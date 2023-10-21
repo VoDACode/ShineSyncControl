@@ -47,6 +47,12 @@ namespace ShineSyncControl
                .HasIndex(x => new { x.DeviceId, x.PropertyName })
                .IsUnique();
 
+            modelBuilder.Entity<Models.DB.Action>()
+                .HasOne(a => a.Owner)
+                .WithMany()
+                .HasForeignKey(a => a.OwnerId)
+                .OnDelete(DeleteBehavior.NoAction);
+
             modelBuilder.Entity<Models.DB.Task>()
                 .HasOne(t => t.Device)
                 .WithMany()
@@ -93,6 +99,17 @@ namespace ShineSyncControl
                     x.UserId,
                     x.DeviceId
                 });
+            modelBuilder.Entity<UserDevice>()
+                .HasOne(ud => ud.User)
+                .WithMany()
+                .HasForeignKey(ud => ud.UserId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<UserDevice>()
+                .HasOne(ud => ud.Device)
+                .WithMany()
+                .HasForeignKey(ud => ud.DeviceId)
+                .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<UserGroup>()
                 .HasKey(x => new
@@ -100,6 +117,16 @@ namespace ShineSyncControl
                     x.UserId,
                     x.GroupId
                 });
+            modelBuilder.Entity<UserGroup>()
+                .HasOne(ug => ug.User)
+                .WithMany()
+                .HasForeignKey(ug => ug.UserId)
+                .OnDelete(DeleteBehavior.NoAction);
+            modelBuilder.Entity<UserGroup>()
+                .HasOne(ug => ug.Group)
+                .WithMany()
+                .HasForeignKey(ug => ug.GroupId)
+                .OnDelete(DeleteBehavior.NoAction);
 
             base.OnModelCreating(modelBuilder);
         }

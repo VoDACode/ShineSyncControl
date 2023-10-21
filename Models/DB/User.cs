@@ -5,7 +5,7 @@ namespace ShineSyncControl.Models.DB
     public class User
     {
         [Key]
-        public string Id { get; set; }
+        public int Id { get; set; }
         [Required]
         [MaxLength(100)]
         public string FirstName { get; set; }
@@ -13,7 +13,6 @@ namespace ShineSyncControl.Models.DB
         [MaxLength(100)]
         public string LastName { get; set; }
         [Required]
-        [MaxLength(1024)]
         public string Password { get; set; }
         [Required]
         [MaxLength(100)]

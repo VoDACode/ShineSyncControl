@@ -59,11 +59,14 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
 
-
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.UseSwagger();
+app.UseSwaggerUI(p =>
+{
+    p.SwaggerEndpoint("/swagger/v1/swagger.json", "");
+});
 
 app.MapControllerRoute(
     name: "default",
