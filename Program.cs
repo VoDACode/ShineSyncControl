@@ -4,6 +4,7 @@
 
 using Microsoft.AspNetCore.Authentication.Cookies;
 using ShineSyncControl;
+using ShineSyncControl.Services.Email;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -35,6 +36,16 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         o.LoginPath = "/login";
     });
 
+builder.Services.AddEmailService(e =>
+{
+    e.Email = builder.Configuration["Services:Email:EmailAddress"];
+    e.SenderName = builder.Configuration["Services:Email:SenderName"];
+    e.Password = builder.Configuration["Services:Email:Password"];
+    e.Host = builder.Configuration["Services:Email:Host"];
+    e.Port = int.Parse(builder.Configuration["Services:Email:Port"]);
+    e.EmailTemplatesFoulder = builder.Configuration["Services:Email:EmailTemplatesFoulder"];
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -48,6 +59,11 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
 
+
+app.UseAuthentication();
+app.UseAuthorization();
+
+app.UseSwagger();
 
 app.MapControllerRoute(
     name: "default",
