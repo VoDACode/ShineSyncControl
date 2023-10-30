@@ -15,21 +15,19 @@ namespace ShineSyncControl.Controllers
 {
     [Route("api/auth")]
     [ApiController]
-    public class AuthController : ControllerBase
+    public class AuthController : BaseController
     {
-        protected readonly DbApp db;
         protected readonly IEmailService email;
 
-        public AuthController(DbApp db, IEmailService email)
+        public AuthController(DbApp db, IEmailService email) : base(db)
         {
-            this.db = db;
             this.email = email;
         }
 
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterUserRequest request)
         {
-            User? user = await db.Users.FirstOrDefaultAsync(p => p.Email == request.Email);
+            User? user = await DB.Users.FirstOrDefaultAsync(p => p.Email == request.Email);
             if (user != null)
             {
                 return BadRequest(new BaseResponse.ErrorResponse("User already exists"));
@@ -44,8 +42,8 @@ namespace ShineSyncControl.Controllers
                 ActivationCode = Guid.NewGuid().ToString(),
                 IsActivated = false
             };
-            await db.Users.AddAsync(user);
-            await db.SaveChangesAsync();
+            await DB.Users.AddAsync(user);
+            await DB.SaveChangesAsync();
 
             await email.SendEmailUseTemplateAsync(user.Email, "ActivateAccount.html", new Dictionary<string, string>
             {
@@ -56,19 +54,17 @@ namespace ShineSyncControl.Controllers
             return Ok(new BaseResponse.SuccessResponse());
         }
 
-
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginUserRequest request)
         {
 
-            User? user = await db.Users.FirstOrDefaultAsync(p => p.Email == request.Email);
+            User? user = await DB.Users.FirstOrDefaultAsync(p => p.Email == request.Email);
             if (user == null)
             {
                 return BadRequest(new AuthorizationFailedResponse());
             }
 
-            string passwordHash = PasswordHasher.Hash(request.Password);
-            if (user.Password != passwordHash)
+            if (!PasswordHasher.Validate(request.Password, user.Password))
             {
                 return BadRequest(new AuthorizationFailedResponse());
             }
@@ -76,7 +72,8 @@ namespace ShineSyncControl.Controllers
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                new Claim(ClaimTypes.Email, user.Email)
+                new Claim(ClaimTypes.Email, user.Email),
+                new Claim(ClaimTypes.Role, user.Role)
             };
 
             var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);

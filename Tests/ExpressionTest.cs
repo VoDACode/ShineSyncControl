@@ -32,7 +32,7 @@ namespace ShineSyncControl.Tests
 
             Device lightLevelSencor = new Device
             {
-                Id = 1,
+                Id = Guid.NewGuid().ToString(),
                 IsActive = true,
                 LastSync = DateTime.UtcNow,
                 Name = "Light level sonsor",
@@ -59,7 +59,7 @@ namespace ShineSyncControl.Tests
 
             Device motionSensor = new Device
             {
-                Id = 2,
+                Id = Guid.NewGuid().ToString(),
                 IsActive = true,
                 LastSync = DateTime.UtcNow,
                 Name = "Motion Sensor",
@@ -86,7 +86,7 @@ namespace ShineSyncControl.Tests
 
             Device relay = new Device
             {
-                Id = 3,
+                Id = Guid.NewGuid().ToString(),
                 IsActive = true,
                 LastSync = DateTime.UtcNow,
                 Name = "Relay",
@@ -140,7 +140,7 @@ namespace ShineSyncControl.Tests
                 DeviceProperty = motionSensor_action,
                 Operator = Operator.Equal,
                 Type = PropertyType.Boolean,
-                Value = "true"
+                Value = "1"
             };
 
             lightLevelSencor_level_expression.SubExpression = motionSensor_action_expression;
@@ -155,9 +155,9 @@ namespace ShineSyncControl.Tests
                 Device = relay,
                 DeviceId = relay.Id,
                 DeviceProperty = relay_status,
-                DevicePropertyId = relay.Id,
+                DevicePropertyId = relay_status.Id,
                 Event = "set",
-                Value = "false",
+                Value = "0",
                 Type = PropertyType.Boolean,
                 Name = "Set to false"
             };
@@ -168,9 +168,9 @@ namespace ShineSyncControl.Tests
                 Device = relay,
                 DeviceId = relay.Id,
                 DeviceProperty = relay_status,
-                DevicePropertyId = relay.Id,
+                DevicePropertyId = relay_status.Id,
                 Event = "set",
-                Value = "true",
+                Value = "1",
                 Type = PropertyType.Boolean,
                 Name = "Set to true"
             };

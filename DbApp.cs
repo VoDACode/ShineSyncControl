@@ -1,10 +1,12 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using ShineSyncControl.Models.DB;
+using ShineSyncControl.Tools;
 
 namespace ShineSyncControl
 {
     public class DbApp : DbContext
     {
+        public DbSet<UserRoles> Roles { get; set; }
         public DbSet<User> Users { get; set; }
         public DbSet<Group> Groups { get; set; }
         public DbSet<Device> Devices { get; set; }
@@ -18,14 +20,26 @@ namespace ShineSyncControl
 
         public DbApp(DbContextOptions<DbApp> options) : base(options)
         {
-            Database.EnsureCreated();
+            DbInit.Initialize(this);
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<UserRoles>()
+                .HasKey(p => p.Role);
+
+            modelBuilder.Entity<User>()
+                .HasOne(p => p.RoleEntity)
+                .WithMany()
+                .HasForeignKey(p => p.Role)
+                .OnDelete(DeleteBehavior.NoAction);
+
             modelBuilder.Entity<User>()
                 .HasIndex(x => x.Email)
                 .IsUnique();
+
+            modelBuilder.Entity<Device>()
+               .HasKey(x => x.Id);
 
             modelBuilder.Entity<Device>()
                .HasIndex(x => x.Token)

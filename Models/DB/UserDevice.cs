@@ -8,7 +8,7 @@ namespace ShineSyncControl.Models.DB
         public int UserId { get; set; }
         public User User { get; set; }
         [Required]
-        public int DeviceId { get; set; }
+        public string DeviceId { get; set; }
         public Device Device { get; set; }
 
         public bool CanSetProperty { get; set; } = false;

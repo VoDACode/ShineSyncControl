@@ -17,6 +17,13 @@ namespace ShineSyncControl.Models.Responses
             Data = data;
         }
 
+        public BaseResponse(bool success, string? message = null)
+        {
+            Success = success;
+            Message = message;
+            Data = null;
+        }
+
         public class SuccessResponse : BaseResponse
         {
             public SuccessResponse(string? message = null, object? data = null) : base(true, message, data)

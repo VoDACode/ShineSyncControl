@@ -1,14 +1,8 @@
-//ShineSyncControl.Tests.ExpressionTest expressionTest = new ShineSyncControl.Tests.ExpressionTest();
-//expressionTest.Run();
-
-
 using Microsoft.AspNetCore.Authentication.Cookies;
 using ShineSyncControl;
 using ShineSyncControl.Services.Email;
 
 var builder = WebApplication.CreateBuilder(args);
-
-// Add services to the container.
 
 builder.Services.AddControllersWithViews();
 

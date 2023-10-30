@@ -47,7 +47,7 @@ namespace ShineSyncControl.Extension
                 case PropertyType.Number:
                     return double.TryParse(a.Value, out double ad) && double.TryParse(b.Value, out double bd) && ad > bd;
                 case PropertyType.Boolean:
-                    return a.Value == "true" && b.Value == "false";
+                    return a.Value == "1" && b.Value == "0";
                 case PropertyType.DateTime: 
                     return DateTime.Parse(a.Value) > DateTime.Parse(b.Value);
                 case PropertyType.TimeOnly:
@@ -70,7 +70,7 @@ namespace ShineSyncControl.Extension
                 case PropertyType.Number:
                     return double.TryParse(a.Value, out double ad) && double.TryParse(b.Value, out double bd) && ad >= bd;
                 case PropertyType.Boolean:
-                    return (a.Value == "true" && b.Value == "false") || a.Value == b.Value;
+                    return (a.Value == "1" && b.Value == "0") || a.Value == b.Value;
                 case PropertyType.DateTime:
                     return DateTime.Parse(a.Value) >= DateTime.Parse(b.Value);
                 case PropertyType.TimeOnly:
@@ -93,7 +93,7 @@ namespace ShineSyncControl.Extension
                 case PropertyType.Number:
                     return double.TryParse(a.Value, out double ad) && double.TryParse(b.Value, out double bd) && ad < bd;
                 case PropertyType.Boolean:
-                    return a.Value == "true" && b.Value == "false";
+                    return a.Value == "1" && b.Value == "0";
                 case PropertyType.DateTime:
                     return DateTime.Parse(a.Value) < DateTime.Parse(b.Value);
                 case PropertyType.TimeOnly:
@@ -116,7 +116,7 @@ namespace ShineSyncControl.Extension
                 case PropertyType.Number:
                     return double.TryParse(a.Value, out double ad) && double.TryParse(b.Value, out double bd) && ad <= bd;
                 case PropertyType.Boolean:
-                    return (a.Value == "true" && b.Value == "false") || a.Value == b.Value;
+                    return (a.Value == "1" && b.Value == "0") || a.Value == b.Value;
                 case PropertyType.DateTime:
                     return DateTime.Parse(a.Value) <= DateTime.Parse(b.Value);
                 case PropertyType.TimeOnly:

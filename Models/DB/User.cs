@@ -21,6 +21,10 @@ namespace ShineSyncControl.Models.DB
         public bool IsActivated { get; set; } = false;
         public string? ActivationCode { get; set; }
 
+        public string Role { get; set; }
+        public UserRoles RoleEntity { get; set; }
+
+
         public ICollection<Action> Actions { get; set; } = new List<Action>();
         public ICollection<UserGroup> Groups { get; set; } = new List<UserGroup>();
         public ICollection<Device> Devices { get; set; } = new List<Device>();
