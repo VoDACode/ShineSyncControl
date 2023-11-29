@@ -1,4 +1,4 @@
-﻿using ShineSyncControl.Models.DB;
+﻿using ShineSyncControl.Enums;
 using System.ComponentModel.DataAnnotations;
 
 namespace ShineSyncControl.Models.Requests

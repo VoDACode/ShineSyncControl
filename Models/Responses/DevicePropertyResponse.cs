@@ -1,4 +1,5 @@
-﻿using ShineSyncControl.Models.DB;
+﻿using ShineSyncControl.Enums;
+using ShineSyncControl.Models.DB;
 
 namespace ShineSyncControl.Models.Responses
 {

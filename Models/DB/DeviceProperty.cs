@@ -1,17 +1,9 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using ShineSyncControl.Contracts;
+using ShineSyncControl.Enums;
+using System.ComponentModel.DataAnnotations;
 
 namespace ShineSyncControl.Models.DB
 {
-    public enum PropertyType
-    {
-        None = 0,
-        String,
-        Number,
-        Boolean,
-        DateTime,
-        TimeOnly
-    }
-
     public class DeviceProperty : IDynamicValue
     {
         [Key]

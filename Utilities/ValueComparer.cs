@@ -1,25 +1,26 @@
-﻿using ShineSyncControl.Exceptions;
-using ShineSyncControl.Models.DB;
+﻿using ShineSyncControl.Contracts;
+using ShineSyncControl.Enums;
+using ShineSyncControl.Exceptions;
 
-namespace ShineSyncControl.Extension
+namespace ShineSyncControl.Utilities
 {
-    public static class ExtensionIDynamicValue
+    public static class ValueComparer
     {
-        public static bool CompareValue(this IDynamicValue a, IDynamicValue b, Operator @operator)
+        public static bool CompareValue(this IDynamicValue a, IDynamicValue b, ComparisonOperator @operator)
         {
             switch (@operator)
             {
-                case Operator.Equal:
+                case ComparisonOperator.Equal:
                     return a.EquelsValue(b);
-                case Operator.NotEqual:
+                case ComparisonOperator.NotEqual:
                     return !a.EquelsValue(b);
-                case Operator.GreaterThan:
+                case ComparisonOperator.GreaterThan:
                     return a.GreaterThan(b);
-                case Operator.GreaterThanOrEqual:
+                case ComparisonOperator.GreaterThanOrEqual:
                     return a.GreaterThanOrEqual(b);
-                case Operator.LessThan:
+                case ComparisonOperator.LessThan:
                     return a.LessThan(b);
-                case Operator.LessThanOrEqual:
+                case ComparisonOperator.LessThanOrEqual:
                     return a.LessThanOrEqual(b);
             }
             return false;
@@ -29,7 +30,7 @@ namespace ShineSyncControl.Extension
         {
             if (a is null || b is null)
                 return true;
-            if(a.Type != b.Type || a.Value != b.Value)
+            if (a.Type != b.Type || a.Value != b.Value)
                 return false;
             return true;
         }
@@ -40,7 +41,7 @@ namespace ShineSyncControl.Extension
 
             switch (a.Type)
             {
-                case PropertyType.None: 
+                case PropertyType.None:
                     return false;
                 case PropertyType.String:
                     return a.Value.CompareTo(b.Value) > 0;
@@ -48,7 +49,7 @@ namespace ShineSyncControl.Extension
                     return double.TryParse(a.Value, out double ad) && double.TryParse(b.Value, out double bd) && ad > bd;
                 case PropertyType.Boolean:
                     return a.Value == "1" && b.Value == "0";
-                case PropertyType.DateTime: 
+                case PropertyType.DateTime:
                     return DateTime.Parse(a.Value) > DateTime.Parse(b.Value);
                 case PropertyType.TimeOnly:
                     return TimeOnly.Parse(a.Value) > TimeOnly.Parse(b.Value);

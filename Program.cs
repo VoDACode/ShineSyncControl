@@ -1,18 +1,27 @@
-using Microsoft.AspNetCore.Authentication.Cookies;
+﻿using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 using ShineSyncControl;
 using ShineSyncControl.Services.Email;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllersWithViews();
 
 var connectionString = builder.Configuration["ConnectionStrings:WebApiDatabase"];
-if(connectionString == null)
+if (connectionString == null)
 {
     throw new Exception("Connection string is null");
 }
 
 builder.Services.AddSqlServer<DbApp>(connectionString);
+
+builder.Services.AddStackExchangeRedisCache(o =>
+{
+    o.Configuration = builder.Configuration["Services:Redis"];
+});
+
 
 builder.Services.AddSwaggerGen(p =>
 {
@@ -24,11 +33,27 @@ builder.Services.AddSwaggerGen(p =>
 });
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-    .AddCookie(o =>
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+}).AddCookie(o =>
     {
         o.LoginPath = "/login";
-    });
+    })
+.AddJwtBearer(options =>
+   {
+       options.TokenValidationParameters = new TokenValidationParameters
+       {
+           ValidateIssuer = true,
+           ValidateAudience = true,
+           ValidateIssuerSigningKey = true,
+           ValidateLifetime = true,
+           ValidIssuer = builder.Configuration["Jwt:Issuer"],
+           ValidAudience = builder.Configuration["Jwt:Audience"],
+           IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:SecretKey"]))
+       };
+   });
 
 builder.Services.AddEmailService(e =>
 {
@@ -38,6 +63,18 @@ builder.Services.AddEmailService(e =>
     e.Host = builder.Configuration["Services:Email:Host"];
     e.Port = int.Parse(builder.Configuration["Services:Email:Port"]);
     e.EmailTemplatesFoulder = builder.Configuration["Services:Email:EmailTemplatesFoulder"];
+});
+
+// add CROS. Access-Control-Allow-Origin
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll",
+               builder =>
+               {
+                   builder.AllowAnyOrigin()
+                       .AllowAnyMethod()
+                       .AllowAnyHeader();
+               });
 });
 
 var app = builder.Build();
@@ -61,6 +98,8 @@ app.UseSwaggerUI(p =>
 {
     p.SwaggerEndpoint("/swagger/v1/swagger.json", "");
 });
+
+app.UseCors("AllowAll");
 
 app.MapControllerRoute(
     name: "default",

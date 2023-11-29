@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Azure.Core;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Distributed;
 using ShineSyncControl.Attributes;
 using ShineSyncControl.Models.DB;
 using ShineSyncControl.Models.Requests;
@@ -14,12 +16,14 @@ namespace ShineSyncControl.Controllers
     [ApiController]
     public class DeviceController : BaseController
     {
+        protected readonly IDistributedCache cache;
 
-        public DeviceController(DbApp db) : base(db)
+        public DeviceController(DbApp db, IDistributedCache cache) : base(db)
         {
+            this.cache = cache;
         }
 
-        [Authorize(Roles = UserRoles.Registrar)]
+        [Authorize(Roles = $"{UserRoles.Registrar},{UserRoles.Admin}")]
         [HttpPost("register")]
         public async Task<IActionResult> RegiaterDevice([FromBody] RegiaterDeviceRequest request)
         {
@@ -77,39 +81,27 @@ namespace ShineSyncControl.Controllers
                 return BadRequest(new BaseResponse.ErrorResponse("Device is already active"));
             }
 
-            device.IsClientConnected = true;
-            await DB.SaveChangesAsync();
+            await cache.SetStringAsync($"device:{request.DeviceId}:user:activate", "true");
 
             DateTime connectionStart = DateTime.Now;
 
-            while (await DB.Devices.AnyAsync(d => d.Id == request.DeviceId && !d.IsDeviceConnected))
+            string? data = null;
+
+            while ((data = await cache.GetStringAsync($"device:{request.DeviceId}:device:activate")) is null)
             {
                 if (DateTime.Now > connectionStart + TimeSpan.FromHours(60))
                 {
-                    device.IsClientConnected = false;
-                    await DB.SaveChangesAsync();
+                    await cache.RemoveAsync($"device:{request.DeviceId}:user:activate");
                     return BadRequest(new BaseResponse.ErrorResponse("Timeout"));
                 }
                 await Task.Delay(1000);
             }
 
             device = await DB.Devices.SingleAsync(d => d.Id == request.DeviceId);
-
-            connectionStart = DateTime.Now;
-
-            while (await DB.Devices.AnyAsync(d => d.Id == request.DeviceId && d.IsDeviceConnected))
-            {
-                if (DateTime.Now > connectionStart + TimeSpan.FromHours(60))
-                {
-                    device.IsClientConnected = false;
-                    await DB.SaveChangesAsync();
-                    return BadRequest(new BaseResponse.ErrorResponse("Timeout"));
-                }
-                await Task.Delay(1000);
-            }
-
             device.OwnerId = AuthorizedUserId;
             await DB.SaveChangesAsync();
+
+            await cache.RemoveAsync($"device:{request.DeviceId}:user:activate");
 
             return Ok(new BaseResponse.SuccessResponse());
         }
@@ -130,22 +122,21 @@ namespace ShineSyncControl.Controllers
                 return BadRequest(new BaseResponse.ErrorResponse("Device is already active"));
             }
 
-            device.IsDeviceConnected = true;
-            await DB.SaveChangesAsync();
+            await cache.SetStringAsync($"device:{deviceId}:device:activate", "true");
 
             DateTime connectionStart = DateTime.Now;
+            string? data = null;
 
-            while (await DB.Devices.AnyAsync(d => d.Id == deviceId && d.Token == token && !d.IsClientConnected))
+            while ((data = await cache.GetStringAsync($"device:{deviceId}:user:activate")) is null)
             {
                 if (DateTime.Now > connectionStart + TimeSpan.FromHours(60))
                 {
-                    device.IsDeviceConnected = false;
-                    await DB.SaveChangesAsync();
+                    await cache.RemoveAsync($"device:{deviceId}:device:activate");
                     return BadRequest(new BaseResponse.ErrorResponse("Timeout"));
                 }
                 await Task.Delay(1000);
             }
-            device = await DB.Devices.FirstOrDefaultAsync(d => d.Id == deviceId);
+            device = await DB.Devices.SingleAsync(d => d.Id == deviceId);
 
             var newToken = new byte[512];
             using (var rng = RandomNumberGenerator.Create())
@@ -154,10 +145,11 @@ namespace ShineSyncControl.Controllers
             }
 
             device.Token = Convert.ToBase64String(newToken);
-            device.IsDeviceConnected = false;
             device.ActivatedAt = DateTime.UtcNow;
             device.IsActive = true;
             await DB.SaveChangesAsync();
+
+            await cache.RemoveAsync($"device:{deviceId}:device:activate");
 
             return Ok(device.Token);
         }
@@ -173,19 +165,19 @@ namespace ShineSyncControl.Controllers
             }
 
             DeviceProperty? property = await DB.DeviceProperties.FirstOrDefaultAsync(p => p.DeviceId == device.Id && p.PropertyName == request.PropertyName);
-            if(property is null)
+            if (property is null)
             {
                 return NotFound(new BaseResponse.ErrorResponse($"Property '{request.PropertyName}' not found"));
             }
 
-            if(!property.TrySetValue(request.Value))
+            if (!property.TrySetValue(request.Value))
             {
                 return BadRequest(new BaseResponse.ErrorResponse($"Invalid data type. Expected '{Enum.GetName(property.Type)}'"));
             }
 
             device.LastSync = DateTime.UtcNow;
             property.PropertyLastSync = DateTime.UtcNow;
-            
+
             await DB.SaveChangesAsync();
 
             return Ok(new DevicePropertyResponse(property));
@@ -193,21 +185,36 @@ namespace ShineSyncControl.Controllers
 
         [Authorize]
         [HttpGet("property")]
-        public async Task<IActionResult> GetProperty([FromQuery(Name = "id")] string deviceId, [FromQuery(Name = "key")] string propertyName)
+        public async Task<IActionResult> GetProperty([FromQuery(Name = "id")] string deviceId, [FromQuery(Name = "key")] string propertyName, [FromHeader(Name = "Token")] string? token)
         {
-            DeviceProperty? property = await DB.DeviceProperties.Include(p => p.Device).Where(p => p.DeviceId == deviceId && p.PropertyName == propertyName).SingleOrDefaultAsync();
+            DeviceProperty? property = await DB.DeviceProperties
+                .Include(p => p.Device)
+                .Where(p => p.DeviceId == deviceId && p.PropertyName == propertyName)
+                .SingleOrDefaultAsync();
 
-            if(property is null || propertyName is null)
+            if (property is null || propertyName is null)
             {
                 return NotFound(new BaseResponse.ErrorResponse($"Property '{deviceId}.{propertyName}' not found"));
             }
 
-            if(property.Device.OwnerId != AuthorizedUserId)
+            if (token is null && property.Device.OwnerId != AuthorizedUserId)
+            {
+                return BadRequest(new BaseResponse.ErrorResponse("Access is denied"));
+            }
+            else if (token is not null && property.Device.Token != token)
             {
                 return BadRequest(new BaseResponse.ErrorResponse("Access is denied"));
             }
 
             return Ok(property.Value);
+        }
+
+        [Authorize]
+        [HttpGet]
+        public async Task<IActionResult> GetDevices()
+        {
+            var devices = await DB.Devices.Where(d => d.OwnerId == AuthorizedUserId).ToListAsync();
+            return Ok(new DeviceResponse(devices));
         }
     }
 }

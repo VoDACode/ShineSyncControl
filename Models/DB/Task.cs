@@ -1,4 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using ShineSyncControl.Contracts;
+using ShineSyncControl.Enums;
+using System.ComponentModel.DataAnnotations;
 
 namespace ShineSyncControl.Models.DB
 {

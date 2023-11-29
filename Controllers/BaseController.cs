@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Mvc;
 using ShineSyncControl.Models.DB;
 using System.Security.Claims;
 
@@ -6,31 +7,41 @@ namespace ShineSyncControl.Controllers
 {
     public class BaseController : ControllerBase
     {
-        protected User? AuthorizedUser
+        protected User AuthorizedUser
         {
             get
             {
-                int? id = AuthorizedUserId;
-
-                if(id == null)
-                    return null;
+                int id = AuthorizedUserId;
 
                 User? user = DB.Users.SingleOrDefault(p => p.Id == id);
+
+                if(user is null)
+                {
+                    HttpContext.SignOutAsync().Wait();
+                    Response.StatusCode = 401;
+                    Response.WriteAsync("Unauthorized").Wait();
+                    throw new InvalidOperationException("This property accessible only for authorized users.");
+                }
 
                 return user;
             }
         }
 
-        protected int? AuthorizedUserId
+        protected int AuthorizedUserId
         {
             get
             {
                 var strId = HttpContext.User.Claims
                     .FirstOrDefault(p => p.Type == ClaimTypes.NameIdentifier)?.Value;
 
+                if(strId is null)
+                {
+                    throw new InvalidOperationException("This property accessible only for authorized users.");
+                }
+
                 if (!int.TryParse(strId, out int id))
                 {
-                    return null;
+                    throw new InvalidOperationException("This property accessible only for authorized users.");
                 }
 
                 return id;

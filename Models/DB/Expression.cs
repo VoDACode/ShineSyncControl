@@ -1,24 +1,10 @@
-﻿using ShineSyncControl.Extension;
+﻿using ShineSyncControl.Contracts;
+using ShineSyncControl.Enums;
+using ShineSyncControl.Utilities;
 using System.ComponentModel.DataAnnotations;
 
 namespace ShineSyncControl.Models.DB
 {
-    public enum Operator
-    {
-        Equal,
-        NotEqual,
-        GreaterThan,
-        GreaterThanOrEqual,
-        LessThan,
-        LessThanOrEqual
-    }
-
-    public enum ExpressionOperator
-    {
-        And,
-        Or
-    }
-
     public class Expression : IDynamicValue
     {
         [Key]
@@ -30,7 +16,7 @@ namespace ShineSyncControl.Models.DB
         public long DevicePropertyId { get; set; }
         public DeviceProperty DeviceProperty { get; set; }
         [Required]
-        public Operator Operator { get; set; }
+        public ComparisonOperator Operator { get; set; }
 
         [Required]
         [MaxLength(255)]
@@ -39,7 +25,7 @@ namespace ShineSyncControl.Models.DB
         public PropertyType Type { get; set; }
 
         public Expression? SubExpression { get; set; }
-        public ExpressionOperator? ExpressionOperator { get; set; }
+        public LogicalOperator? ExpressionOperator { get; set; }
 
         public ICollection<Action> Actions = new List<Action>();
 
@@ -50,7 +36,7 @@ namespace ShineSyncControl.Models.DB
                 return this.CompareValue(DeviceProperty, Operator);
             }
 
-            if (ExpressionOperator == DB.ExpressionOperator.And)
+            if (ExpressionOperator == LogicalOperator.And)
             {
                 return this.CompareValue(DeviceProperty, Operator) && SubExpression.Execute();
             }

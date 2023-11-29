@@ -17,8 +17,6 @@ namespace ShineSyncControl.Models.DB
         [MaxLength(1024)]
         public string Token { get; set; }
         public bool IsActive { get; set; } = false;
-        public bool IsClientConnected { get; set; } = false;
-        public bool IsDeviceConnected { get; set; } = false;
         public DateTime? LastSync { get; set; } = null;
         public DateTime RegisteredAt { get; set; } = DateTime.UtcNow;
         public DateTime? ActivatedAt { get; set; } = null;

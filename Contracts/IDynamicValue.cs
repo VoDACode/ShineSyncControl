@@ -1,4 +1,6 @@
-﻿namespace ShineSyncControl.Models.DB
+﻿using ShineSyncControl.Enums;
+
+namespace ShineSyncControl.Contracts
 {
     public interface IDynamicValue
     {

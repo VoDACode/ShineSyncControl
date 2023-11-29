@@ -1,4 +1,5 @@
-﻿using ShineSyncControl.Models.DB;
+﻿using ShineSyncControl.Enums;
+using ShineSyncControl.Models.DB;
 
 namespace ShineSyncControl.Tests
 {
@@ -126,11 +127,11 @@ namespace ShineSyncControl.Tests
                 Id = 0,
                 Device = lightLevelSencor,
                 DeviceProperty = lightLevelSencor_level,
-                Operator = Operator.LessThanOrEqual,
+                Operator = ComparisonOperator.LessThanOrEqual,
                 Type = PropertyType.Number,
                 Value = "50",
 
-                ExpressionOperator = ExpressionOperator.And
+                ExpressionOperator = LogicalOperator.And
             };
 
             Expression motionSensor_action_expression = new Expression
@@ -138,7 +139,7 @@ namespace ShineSyncControl.Tests
                 Id = 1,
                 Device = motionSensor,
                 DeviceProperty = motionSensor_action,
-                Operator = Operator.Equal,
+                Operator = ComparisonOperator.Equal,
                 Type = PropertyType.Boolean,
                 Value = "1"
             };

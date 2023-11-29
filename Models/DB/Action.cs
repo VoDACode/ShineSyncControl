@@ -19,8 +19,8 @@ namespace ShineSyncControl.Models.DB
         public int OwnerId { get; set; }
 
         [Required]
-        public int GroupId { get; set; }
-        public Group Group { get; set; }
+        public int? GroupId { get; set; }
+        public Group? Group { get; set; }
 
         // ?
         public ICollection<ActionTask> ActionTasks { get; set; } = new List<ActionTask>();
