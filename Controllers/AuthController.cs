@@ -1,6 +1,4 @@
 ﻿using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -73,36 +71,6 @@ namespace ShineSyncControl.Controllers
                 return BadRequest(new AuthorizationFailedResponse());
             }
 
-            if (isJWT)
-            {
-                return await loginWhithJWT(user);
-            }
-            else
-            {
-                return await loginWhithCookie(user);
-            }
-        }
-
-        [HttpGet("logout")]
-        public async Task<IActionResult> Logout()
-        {
-            await HttpContext.SignOutAsync();
-            return Ok(new BaseResponse.SuccessResponse());
-        }
-
-        [HttpGet("check")]
-        public IActionResult Check()
-        {
-            if (HttpContext.User.Claims
-                    .FirstOrDefault(p => p.Type == ClaimTypes.NameIdentifier)?.Value is null)
-            {
-                return Ok(new BaseResponse.ErrorResponse());
-            }
-            return Ok(new BaseResponse.SuccessResponse());
-        }
-
-        private async Task<IActionResult> loginWhithJWT(User user)
-        {
             var secretKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:SecretKey"]));
             var signingCredentials = new SigningCredentials(secretKey, SecurityAlgorithms.HmacSha256);
 
@@ -123,22 +91,32 @@ namespace ShineSyncControl.Controllers
 
             var tokenString = new JwtSecurityTokenHandler().WriteToken(tokenOptions);
 
-            return Ok(new BaseResponse.SuccessResponse(null, tokenString));
+            if(isJWT)
+            {
+                return Ok(new BaseResponse.SuccessResponse(null, tokenString));
+            }
+            else
+            {
+                HttpContext.Response.Cookies.Append(".VoDACode.Authorize", tokenString);
+                return Ok(new BaseResponse.SuccessResponse());
+            }
         }
 
-        private async Task<IActionResult> loginWhithCookie(User user)
+        [HttpGet("logout")]
+        public async Task<IActionResult> Logout()
         {
-            var claims = new List<Claim>
+            await HttpContext.SignOutAsync();
+            return Ok(new BaseResponse.SuccessResponse());
+        }
+
+        [HttpGet("check")]
+        public IActionResult Check()
+        {
+            if (HttpContext.User.Claims
+                    .FirstOrDefault(p => p.Type == ClaimTypes.NameIdentifier)?.Value is null)
             {
-                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                new Claim(ClaimTypes.Email, user.Email),
-                new Claim(ClaimTypes.Role, user.Role)
-            };
-
-            var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-
-            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity));
-
+                return Ok(new BaseResponse.ErrorResponse());
+            }
             return Ok(new BaseResponse.SuccessResponse());
         }
     }

@@ -10,6 +10,11 @@ namespace ShineSyncControl.Models.Responses
             Data = new View(property);
         }
 
+        public DevicePropertyResponse(IEnumerable<DeviceProperty> property) : base(true, null)
+        {
+            Data = property.Select(p => new View(p));
+        }
+
         public class View
         {
             public string DeviceId { get; set; }

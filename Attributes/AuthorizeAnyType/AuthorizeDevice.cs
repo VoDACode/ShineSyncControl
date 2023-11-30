@@ -3,13 +3,10 @@ using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.EntityFrameworkCore;
 using ShineSyncControl.Models.DB;
 
-namespace ShineSyncControl.Attributes
+namespace ShineSyncControl.Attributes.AuthorizeAnyType
 {
-    [AttributeUsage(AttributeTargets.Method)]
-    public class AuthorizeDeviceAttribute : Attribute, IAuthorizationFilter
+    public class AuthorizeDevice : IAuthorizationFilter
     {
-        public bool OnlyActivated { get; set; } = true;
-
         public async void OnAuthorization(AuthorizationFilterContext context)
         {
             HttpContext? http = context.HttpContext;
@@ -33,8 +30,7 @@ namespace ShineSyncControl.Attributes
             }
 
             Device? device = await dbContext.Devices.FirstOrDefaultAsync(d => d.Id == deviceId && d.Token == token);
-
-            if(device is null || (OnlyActivated && !device.IsActive))
+            if (device is null)
             {
                 context.Result = new UnauthorizedResult();
                 return;

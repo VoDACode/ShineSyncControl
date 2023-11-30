@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
 using ShineSyncControl.Attributes;
+using ShineSyncControl.Enums;
 using ShineSyncControl.Models.DB;
 using ShineSyncControl.Models.Requests;
 using ShineSyncControl.Models.Responses;
@@ -37,7 +38,7 @@ namespace ShineSyncControl.Controllers
             {
                 Id = $"{Guid.NewGuid()}-{DateTime.UtcNow.Ticks}",
                 Type = request.Type,
-                Token = Convert.ToBase64String(token)
+                Token = Convert.ToBase64String(token).Replace("\\", "").Replace("/", "").Replace("=", "")
             })).Entity;
 
             await DB.SaveChangesAsync();
@@ -67,7 +68,7 @@ namespace ShineSyncControl.Controllers
          *  
          */
 
-        [Authorize]
+        [AuthorizeAnyType]
         [HttpPut("activate")]
         public async Task<IActionResult> ActivateDevice([FromQuery] ActivateDeviceRequest request)
         {
@@ -106,7 +107,7 @@ namespace ShineSyncControl.Controllers
             return Ok(new BaseResponse.SuccessResponse());
         }
 
-        [AuthorizeDevice(OnlyActivated = false)]
+        [AuthorizeAnyType(Type = AuthorizeType.Device)]
         [HttpGet("waiting-activation")]
         public async Task<IActionResult> GetWaitingActivationDevices([FromHeader(Name = "DeviceId")] string deviceId, [FromHeader(Name = "Token")] string token)
         {
@@ -144,7 +145,7 @@ namespace ShineSyncControl.Controllers
                 rng.GetBytes(newToken);
             }
 
-            device.Token = Convert.ToBase64String(newToken);
+            device.Token = Convert.ToBase64String(newToken).Replace("\\", "").Replace("/", "").Replace("=", "");
             device.ActivatedAt = DateTime.UtcNow;
             device.IsActive = true;
             await DB.SaveChangesAsync();
@@ -154,20 +155,25 @@ namespace ShineSyncControl.Controllers
             return Ok(device.Token);
         }
 
-        [AuthorizeDevice]
-        [HttpPut("property")]
-        public async Task<IActionResult> UpdateProperty([FromBody] UpdatePropertyRequest request)
+        [AuthorizeAnyType(Type = AuthorizeType.Any)]
+        [HttpPut("{deviceId}/property/{propertyName}")]
+        public async Task<IActionResult> UpdateProperty([FromRoute] string deviceId, [FromRoute] string propertyName, [FromBody] UpdatePropertyRequest request)
         {
             Device? device = HttpContext.Items["Device"] as Device;
-            if (device is null)
+            if (device is not null && device.Id != deviceId)
             {
-                return NotFound(new BaseResponse.ErrorResponse("Device is not registered"));
+                return BadRequest(new BaseResponse.ErrorResponse("Device is not registered"));
             }
 
-            DeviceProperty? property = await DB.DeviceProperties.FirstOrDefaultAsync(p => p.DeviceId == device.Id && p.PropertyName == request.PropertyName);
+            DeviceProperty? property = await DB.DeviceProperties.Include(p => p.Device).FirstOrDefaultAsync(p => p.DeviceId == deviceId && p.PropertyName == propertyName);
             if (property is null)
             {
-                return NotFound(new BaseResponse.ErrorResponse($"Property '{request.PropertyName}' not found"));
+                return NotFound(new BaseResponse.ErrorResponse($"Property '{propertyName}' not found"));
+            }
+
+            if(property.IsReadOnly && device is null)
+            {
+                return BadRequest(new BaseResponse.ErrorResponse($"Property '{propertyName}' is read only"));
             }
 
             if (!property.TrySetValue(request.Value))
@@ -175,7 +181,7 @@ namespace ShineSyncControl.Controllers
                 return BadRequest(new BaseResponse.ErrorResponse($"Invalid data type. Expected '{Enum.GetName(property.Type)}'"));
             }
 
-            device.LastSync = DateTime.UtcNow;
+            property.Device.LastSync = DateTime.UtcNow;
             property.PropertyLastSync = DateTime.UtcNow;
 
             await DB.SaveChangesAsync();
@@ -183,9 +189,33 @@ namespace ShineSyncControl.Controllers
             return Ok(new DevicePropertyResponse(property));
         }
 
-        [Authorize]
-        [HttpGet("property")]
-        public async Task<IActionResult> GetProperty([FromQuery(Name = "id")] string deviceId, [FromQuery(Name = "key")] string propertyName, [FromHeader(Name = "Token")] string? token)
+        [AuthorizeAnyType]
+        [HttpGet("{deviceId}/property")]
+        public async Task<IActionResult> GetProperties([FromRoute] string deviceId, [FromHeader(Name = "Token")] string? token)
+        {
+            Device? device = await DB.Devices
+                .Include(d => d.Properties)
+                .Where(d => d.Id == deviceId)
+                .SingleOrDefaultAsync();
+            if (device is null)
+            {
+                return NotFound(new BaseResponse.ErrorResponse($"Device '{deviceId}' not found"));
+            }
+            if (token is null && device.OwnerId != AuthorizedUserId)
+            {
+                return BadRequest(new BaseResponse.ErrorResponse("Access is denied"));
+            }
+            else if (token is not null && device.Token != token)
+            {
+                return BadRequest(new BaseResponse.ErrorResponse("Access is denied"));
+            }
+
+            return Ok(new DevicePropertyResponse(device.Properties));
+        }
+
+        [AuthorizeAnyType]
+        [HttpGet("{deviceId}/property/{propertyName}")]
+        public async Task<IActionResult> GetProperty([FromRoute] string deviceId, [FromRoute] string propertyName, [FromHeader(Name = "Token")] string? token)
         {
             DeviceProperty? property = await DB.DeviceProperties
                 .Include(p => p.Device)
@@ -209,7 +239,7 @@ namespace ShineSyncControl.Controllers
             return Ok(property.Value);
         }
 
-        [Authorize]
+        [AuthorizeAnyType]
         [HttpGet]
         public async Task<IActionResult> GetDevices()
         {
