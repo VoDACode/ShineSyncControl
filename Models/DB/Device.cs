@@ -22,6 +22,6 @@ namespace ShineSyncControl.Models.DB
         public DateTime? ActivatedAt { get; set; } = null;
 
         public ICollection<DeviceProperty> Properties { get; set; } = new List<DeviceProperty>();
-        public ICollection<Task> Tasks { get; set; } = new List<Task>();
+        public ICollection<TaskModel> Tasks { get; set; } = new List<TaskModel>();
     }
 }

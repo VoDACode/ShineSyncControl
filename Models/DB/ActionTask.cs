@@ -6,12 +6,12 @@ namespace ShineSyncControl.Models.DB
     {
         [Required]
         public int ActionId { get; set; }
-        public Action Action { get; set; }
+        public ActionModel Action { get; set; }
         [Required]
         public int WhenTrueTaskId { get; set; }
-        public Task WhenTrueTask { get; set; }
+        public TaskModel WhenTrueTask { get; set; }
         [Required]
         public int WhenFalseTaskId { get; set; }
-        public Task WhenFalseTask { get; set; }
+        public TaskModel WhenFalseTask { get; set; }
     }
 }

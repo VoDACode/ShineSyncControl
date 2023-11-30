@@ -8,8 +8,8 @@ namespace ShineSyncControl.Tests
         private List<Device> devices = new List<Device>();
         private List<DeviceProperty> properties = new List<DeviceProperty>();
         private List<Expression> expressions = new List<Expression>();
-        private List<Models.DB.Task> tasks = new List<Models.DB.Task>();
-        private List<Models.DB.Action> actions = new List<Models.DB.Action>();
+        private List<Models.DB.TaskModel> tasks = new List<Models.DB.TaskModel>();
+        private List<Models.DB.ActionModel> actions = new List<Models.DB.ActionModel>();
         private List<ActionTask> actionTasks = new List<ActionTask>();
 
         DeviceProperty lightLevelSencor_level;
@@ -150,27 +150,27 @@ namespace ShineSyncControl.Tests
 
             // tasks
 
-            Models.DB.Task relay_status_false = new Models.DB.Task
+            Models.DB.TaskModel relay_status_false = new Models.DB.TaskModel
             {
                 Id = 0,
                 Device = relay,
                 DeviceId = relay.Id,
                 DeviceProperty = relay_status,
                 DevicePropertyId = relay_status.Id,
-                Event = "set",
+                EventName = "set",
                 Value = "0",
                 Type = PropertyType.Boolean,
                 Name = "Set to false"
             };
 
-            Models.DB.Task relay_status_true = new Models.DB.Task
+            Models.DB.TaskModel relay_status_true = new Models.DB.TaskModel
             {
                 Id = 0,
                 Device = relay,
                 DeviceId = relay.Id,
                 DeviceProperty = relay_status,
                 DevicePropertyId = relay_status.Id,
-                Event = "set",
+                EventName = "set",
                 Value = "1",
                 Type = PropertyType.Boolean,
                 Name = "Set to true"
@@ -181,7 +181,7 @@ namespace ShineSyncControl.Tests
 
             // action
 
-            Models.DB.Action autoLightAction = new Models.DB.Action
+            Models.DB.ActionModel autoLightAction = new Models.DB.ActionModel
             {
                 Id = 0,
                 Expression = lightLevelSencor_level_expression,
@@ -211,11 +211,11 @@ namespace ShineSyncControl.Tests
                     var action = actionTask.Action;
                     if (action.Expression.Execute())
                     {
-                        actionTask?.WhenTrueTask.Execute();
+                        //actionTask?.WhenTrueTask.Execute();
                     }
                     else
                     {
-                        actionTask?.WhenFalseTask.Execute();
+                        //actionTask?.WhenFalseTask.Execute();
                     }
                 }
                 // random light level

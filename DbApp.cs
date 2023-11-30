@@ -12,8 +12,8 @@ namespace ShineSyncControl
         public DbSet<Device> Devices { get; set; }
         public DbSet<DeviceProperty> DeviceProperties { get; set; }
         public DbSet<Expression> Expressions { get; set; }
-        public DbSet<Models.DB.Action> Actions { get; set; }
-        public DbSet<Models.DB.Task> Tasks { get; set; }
+        public DbSet<Models.DB.ActionModel> Actions { get; set; }
+        public DbSet<Models.DB.TaskModel> Tasks { get; set; }
         public DbSet<ActionTask> ActionTask { get; set; }
         public DbSet<UserDevice> UserDevices { get; set; }
         public DbSet<UserGroup> UserGroups { get; set; }
@@ -61,19 +61,19 @@ namespace ShineSyncControl
                .HasIndex(x => new { x.DeviceId, x.PropertyName })
                .IsUnique();
 
-            modelBuilder.Entity<Models.DB.Action>()
+            modelBuilder.Entity<Models.DB.ActionModel>()
                 .HasOne(a => a.Owner)
                 .WithMany()
                 .HasForeignKey(a => a.OwnerId)
                 .OnDelete(DeleteBehavior.NoAction);
 
-            modelBuilder.Entity<Models.DB.Task>()
+            modelBuilder.Entity<Models.DB.TaskModel>()
                 .HasOne(t => t.Device)
                 .WithMany()
                 .HasForeignKey(t => t.DeviceId)
                 .OnDelete(DeleteBehavior.NoAction);
 
-            modelBuilder.Entity<Models.DB.Task>()
+            modelBuilder.Entity<Models.DB.TaskModel>()
                 .HasOne(t => t.DeviceProperty)
                 .WithMany()
                 .HasForeignKey(t => t.DevicePropertyId)

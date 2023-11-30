@@ -2,7 +2,7 @@
 
 namespace ShineSyncControl.Models.DB
 {
-    public class Action
+    public class ActionModel
     {
         [Key]
         public int Id { get; set; }
@@ -18,7 +18,6 @@ namespace ShineSyncControl.Models.DB
         [Required]
         public int OwnerId { get; set; }
 
-        [Required]
         public int? GroupId { get; set; }
         public Group? Group { get; set; }
 

@@ -20,8 +20,8 @@ namespace ShineSyncControl.Attributes.AuthorizeAnyType
                 throw new ArgumentNullException("DbApp is null");
             }
 
-            string? deviceId = http.Request.Headers["deviceId"];
-            string? token = http.Request.Headers["token"];
+            string? deviceId = http.Request.Headers["DeviceId"];
+            string? token = http.Request.Headers["Token"];
 
             if (deviceId == null || token == null)
             {
@@ -29,7 +29,7 @@ namespace ShineSyncControl.Attributes.AuthorizeAnyType
                 return;
             }
 
-            Device? device = await dbContext.Devices.FirstOrDefaultAsync(d => d.Id == deviceId && d.Token == token);
+            Device? device = dbContext.Devices.SingleOrDefault(d => d.Id == deviceId && d.Token == token);
             if (device is null)
             {
                 context.Result = new UnauthorizedResult();

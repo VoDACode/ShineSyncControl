@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using ShineSyncControl;
 using ShineSyncControl.Services.Email;
+using ShineSyncControl.Services.TaskEventWorker;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -76,6 +77,8 @@ builder.Services.AddCors(options =>
                        .AllowAnyHeader();
                });
 });
+
+builder.Services.AddTaskEventWorker();
 
 var app = builder.Build();
 

@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace ShineSyncControl.Models.Requests
 {
-    public class RegiaterDeviceRequest
+    public class RegisterDeviceRequest
     {
         [Required]
         [MaxLength(100)]

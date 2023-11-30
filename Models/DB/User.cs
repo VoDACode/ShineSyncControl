@@ -25,7 +25,7 @@ namespace ShineSyncControl.Models.DB
         public UserRoles RoleEntity { get; set; }
 
 
-        public ICollection<Action> Actions { get; set; } = new List<Action>();
+        public ICollection<ActionModel> Actions { get; set; } = new List<ActionModel>();
         public ICollection<UserGroup> Groups { get; set; } = new List<UserGroup>();
         public ICollection<Device> Devices { get; set; } = new List<Device>();
         public ICollection<UserDevice> UserDevices { get; set; } = new List<UserDevice>();

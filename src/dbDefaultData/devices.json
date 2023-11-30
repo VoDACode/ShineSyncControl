@@ -1,0 +1,42 @@
+﻿[
+  {
+    "type": "Relay",
+    "properties": [
+      {
+        "propertyName": "status",
+        "isReadOnly": false,
+        "type": 3
+      }
+    ]
+  },
+  {
+    "type": "LightLevelSonsor",
+    "properties": [
+      {
+        "propertyName": "level",
+        "isReadOnly": true,
+        "type": 2
+      }
+    ]
+  },
+  {
+    "type": "MotionSensor",
+    "properties": [
+      {
+        "propertyName": "action",
+        "isReadOnly": true,
+        "type": 3
+      }
+    ]
+  },
+  {
+    "type": "Switsh",
+    "properties": [
+      {
+        "propertyName": "status",
+        "isReadOnly": false,
+        "type": 3
+      }
+    ]
+  }
+]

@@ -12,6 +12,8 @@ namespace ShineSyncControl.Models.Requests
         public ExpressionPostRequest Expression { get; set; }
 
         [Required]
-        public TaskPostRequest Task { get; set; }
+        public TaskPostRequest WhenTrueTask { get; set; }
+        [Required]
+        public TaskPostRequest WhenFalseTask { get; set; }
     }
 }

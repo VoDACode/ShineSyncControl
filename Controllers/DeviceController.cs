@@ -8,6 +8,7 @@ using ShineSyncControl.Enums;
 using ShineSyncControl.Models.DB;
 using ShineSyncControl.Models.Requests;
 using ShineSyncControl.Models.Responses;
+using ShineSyncControl.Services.TaskEventWorker;
 using System.Security.Cryptography;
 using Task = System.Threading.Tasks.Task;
 
@@ -18,15 +19,17 @@ namespace ShineSyncControl.Controllers
     public class DeviceController : BaseController
     {
         protected readonly IDistributedCache cache;
+        protected readonly ITaskEventWorker taskEventWorker;
 
-        public DeviceController(DbApp db, IDistributedCache cache) : base(db)
+        public DeviceController(DbApp db, IDistributedCache cache, ITaskEventWorker taskEventWorker) : base(db)
         {
             this.cache = cache;
+            this.taskEventWorker = taskEventWorker;
         }
 
         [Authorize(Roles = $"{UserRoles.Registrar},{UserRoles.Admin}")]
         [HttpPost("register")]
-        public async Task<IActionResult> RegiaterDevice([FromBody] RegiaterDeviceRequest request)
+        public async Task<IActionResult> RegiaterDevice([FromBody] RegisterDeviceRequest request)
         {
             var token = new byte[512];
             using (var rng = RandomNumberGenerator.Create())
@@ -103,6 +106,7 @@ namespace ShineSyncControl.Controllers
             await DB.SaveChangesAsync();
 
             await cache.RemoveAsync($"device:{request.DeviceId}:user:activate");
+            await cache.RemoveAsync($"device:{request.DeviceId}:device:activate");
 
             return Ok(new BaseResponse.SuccessResponse());
         }
@@ -150,8 +154,6 @@ namespace ShineSyncControl.Controllers
             device.IsActive = true;
             await DB.SaveChangesAsync();
 
-            await cache.RemoveAsync($"device:{deviceId}:device:activate");
-
             return Ok(device.Token);
         }
 
@@ -185,6 +187,28 @@ namespace ShineSyncControl.Controllers
             property.PropertyLastSync = DateTime.UtcNow;
 
             await DB.SaveChangesAsync();
+
+            var actionTasks = await DB.ActionTask
+            .Include(a => a.WhenTrueTask).ThenInclude(p => p.DeviceProperty)
+            .Include(a => a.WhenFalseTask).ThenInclude(p => p.DeviceProperty)
+            .Include(a => a.Action).ThenInclude(p => p.Expression).ThenInclude(e => e.SubExpression).ThenInclude(p => p.DeviceProperty)
+            .Where(a => (a.Action.Expression.DeviceId == deviceId && a.Action.Expression.DevicePropertyId == property.Id) ||
+                        (a.Action.Expression.SubExpression != null && a.Action.Expression.SubExpression.DeviceId == deviceId && a.Action.Expression.SubExpression.DevicePropertyId == property.Id)
+                      )
+                .ToListAsync();
+
+            foreach (var actionTask in actionTasks)
+            {
+                if (actionTask.Action.Expression.Execute())
+                {
+                    taskEventWorker.Execute(actionTask.WhenTrueTask);
+                }
+                else
+                {
+                    taskEventWorker.Execute(actionTask.WhenFalseTask);
+                }
+                await DB.SaveChangesAsync();
+            }
 
             return Ok(new DevicePropertyResponse(property));
         }

@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc.Filters;
 using ShineSyncControl.Attributes.AuthorizeAnyType;
 using ShineSyncControl.Enums;
+using System.Linq;
 using System.Security.Claims;
 
 namespace ShineSyncControl.Attributes
@@ -18,60 +19,39 @@ namespace ShineSyncControl.Attributes
         {
             HttpContext? http = context.HttpContext;
 
-            if(http is null)
+            if (http is null)
             {
                 context.Result = new UnauthorizedResult();
                 return;
             }
 
-            string? authorizeType = http.Request.Headers["Authorization-Type"];
+            bool isDevice = http.Request.Headers.ContainsKey("DeviceId") && http.Request.Headers.ContainsKey("Token");
+            bool isCookie = http.Request.Cookies.Any(p => p.Key == ".VoDACode.Authorize");
+            bool isJWT = http.Request.Headers.Any(p => p.Key == "Authorization");
 
-            IAuthorizationFilter? handeled = null;
+            IAuthorizationFilter? handeled = isCookie && ValidateType(AuthorizeType.Cookie) ? new AuthorizeCookie() :
+                                             isJWT && ValidateType(AuthorizeType.JWT) ? new AuthorizeJWT() :
+                                             isDevice && ValidateType(AuthorizeType.Device) ? new AuthorizeDevice() :
+                                             null;
 
-            if ((this.intType & (int)AuthorizeType.Any) == 0)
+            if(handeled is null)
             {
-                if (authorizeType is null && (this.intType & (int)AuthorizeType.Cookie) == 0)
-                {
-                    context.Result = new ForbidResult();
-                    return;
-                }
-                if (authorizeType == "Device" && (this.intType & (int)AuthorizeType.Device) == 0)
-                {
-                    context.Result = new ForbidResult();
-                    return;
-                }
-                if (authorizeType == "JWT" && (this.intType & (int)AuthorizeType.JWT) == 0)
-                {
-                    context.Result = new ForbidResult();
-                    return;
-                }
-            }
-
-            switch (authorizeType)
-            {
-                case "Device":
-                    handeled = new AuthorizeDevice();
-                    break;
-                case "JWT":
-                    handeled = new AuthorizeJWT();
-                    break;
-                default:
-                    handeled = new AuthorizeCookie();
-                    break;
+                context.Result = new UnauthorizedResult();
+                return;
             }
 
             handeled.OnAuthorization(context);
 
-            if (context.Result is null && Roles is not null && authorizeType != "Device")
+            if (context.Result is null && Roles is not null && !isDevice)
             {
                 var userRoles = context.HttpContext.User.FindFirst(ClaimTypes.Role);
-                if(userRoles != null)
+                if (userRoles != null)
                 {
                     var parsedRole = userRoles.Value.Split(',');
 
                     foreach (var role in parsedRole)
                     {
-                        if(roles?.Contains(role) == true)
+                        if (roles?.Contains(role) == true)
                         {
                             return;
                         }
@@ -80,6 +60,13 @@ namespace ShineSyncControl.Attributes
                     return;
                 }
             }
+        }
+
+        bool ValidateType(AuthorizeType type)
+        {
+            if ((intType & (int)AuthorizeType.Any) == (int)AuthorizeType.Any)
+                return true;
+            return (intType & (int)type) == (int)type;
         }
     }
 }

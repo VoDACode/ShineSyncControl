@@ -24,6 +24,9 @@ namespace ShineSyncControl.Models.DB
         public string? PropertyUnit { get; set; }
         public DateTime PropertyLastSync { get; set; }
 
+        public ICollection<Expression> Expressions { get; set; } = new List<Expression>();
+        public ICollection<TaskModel> Tasks { get; set; } = new List<TaskModel>();
+
         public DeviceProperty()
         {
             this.SetDefaultValue();

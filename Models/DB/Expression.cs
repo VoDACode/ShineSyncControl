@@ -24,10 +24,11 @@ namespace ShineSyncControl.Models.DB
         [Required]
         public PropertyType Type { get; set; }
 
+        public int? SubExpressionId { get; set; }
         public Expression? SubExpression { get; set; }
         public LogicalOperator? ExpressionOperator { get; set; }
 
-        public ICollection<Action> Actions = new List<Action>();
+        public ICollection<ActionModel> Actions = new List<ActionModel>();
 
         public bool Execute()
         {

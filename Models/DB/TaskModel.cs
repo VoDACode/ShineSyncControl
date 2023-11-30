@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace ShineSyncControl.Models.DB
 {
-    public class Task : IDynamicValue
+    public class TaskModel : IDynamicValue
     {
         [Key]
         public int Id { get; set; }
@@ -20,21 +20,13 @@ namespace ShineSyncControl.Models.DB
 
         [Required]
         [MaxLength(50)]
-        public string Event { get; set; } // set
-        [Required]
+        public string EventName { get; set; }
         [MaxLength(255)]
         public string Value { get; set; }
         [Required]
         public PropertyType Type { get; set; }
         public string? Description { get; set; }
 
-        public void Execute()
-        {
-            if (Event == "set")
-            {
-                Console.WriteLine($"Device: [{Device.Name}]; Prop: [{DeviceProperty.PropertyName}]; E:[{Event}] O:[{DeviceProperty.Value}] N:[{Value}]");
-                DeviceProperty.Value = Value;
-            }
-        }
+
     }
 }

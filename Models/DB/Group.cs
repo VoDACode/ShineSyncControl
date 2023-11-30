@@ -16,6 +16,6 @@ namespace ShineSyncControl.Models.DB
         [Required]
         public int OwnerId { get; set; }
 
-        public ICollection<Action> Actions { get; set; } = new List<Action>();
+        public ICollection<ActionModel> Actions { get; set; } = new List<ActionModel>();
     }
 }

@@ -17,6 +17,7 @@ namespace ShineSyncControl.Models.Responses
 
         public class View
         {
+            public long Id { get; set; }
             public string DeviceId { get; set; }
             public string PropertyName { get; set; }
             public string Value { get; set; }
@@ -29,6 +30,7 @@ namespace ShineSyncControl.Models.Responses
 
             public View(DeviceProperty property)
             {
+                this.Id = property.Id;
                 this.DeviceId = property.DeviceId;
                 this.PropertyName = property.PropertyName;
                 this.Value = property.Value;
