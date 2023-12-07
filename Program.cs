@@ -2,9 +2,11 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using ShineSyncControl;
+using ShineSyncControl.Services.DeviceCommand;
 using ShineSyncControl.Services.Email;
 using ShineSyncControl.Services.TaskEventWorker;
 using System.Text;
+using VoDA.WebSockets;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -80,6 +82,8 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddTaskEventWorker();
 
+builder.Services.AddDeviceCommand();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -103,6 +107,8 @@ app.UseSwaggerUI(p =>
 });
 
 app.UseCors("AllowAll");
+
+app.UseVoDAWebSocket();
 
 app.MapControllerRoute(
     name: "default",

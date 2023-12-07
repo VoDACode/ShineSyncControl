@@ -1,5 +1,4 @@
-﻿using Azure.Core;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
@@ -25,6 +24,13 @@ namespace ShineSyncControl.Controllers
         {
             this.cache = cache;
             this.taskEventWorker = taskEventWorker;
+        }
+
+        [AuthorizeAnyType(Type = AuthorizeType.Device)]
+        [HttpGet("time")]
+        public async Task<IActionResult> GetTime()
+        {
+            return Ok(DateTime.UtcNow.Ticks);
         }
 
         [Authorize(Roles = $"{UserRoles.Registrar},{UserRoles.Admin}")]

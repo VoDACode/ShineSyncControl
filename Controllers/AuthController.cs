@@ -71,7 +71,7 @@ namespace ShineSyncControl.Controllers
                 return BadRequest(new AuthorizationFailedResponse());
             }
 
-            var secretKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:SecretKey"]));
+            var secretKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:SecretKey"]));
             var signingCredentials = new SigningCredentials(secretKey, SecurityAlgorithms.HmacSha256);
 
             var claims = new[]
@@ -82,10 +82,10 @@ namespace ShineSyncControl.Controllers
             };
 
             var tokenOptions = new JwtSecurityToken(
-                issuer: _configuration["Jwt:Issuer"],
-                audience: _configuration["Jwt:Audience"],
+                issuer: _configuration["JWT:Issuer"],
+                audience: _configuration["JWT:Audience"],
                 claims: claims,
-                expires: DateTime.Now.AddHours(Convert.ToDouble(_configuration["Jwt:ExpirationHours"])),
+                expires: DateTime.Now.AddHours(Convert.ToDouble(_configuration["JWT:ExpirationHours"])),
                 signingCredentials: signingCredentials
             );
 
