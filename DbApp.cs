@@ -14,6 +14,7 @@ namespace ShineSyncControl
         public DbSet<Expression> Expressions { get; set; }
         public DbSet<Models.DB.ActionModel> Actions { get; set; }
         public DbSet<Models.DB.TaskModel> Tasks { get; set; }
+        public DbSet<ScheduledTask> ScheduledTasks { get; set; }
         public DbSet<ActionTask> ActionTask { get; set; }
         public DbSet<UserDevice> UserDevices { get; set; }
         public DbSet<UserGroup> UserGroups { get; set; }

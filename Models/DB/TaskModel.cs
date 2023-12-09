@@ -27,6 +27,7 @@ namespace ShineSyncControl.Models.DB
         public PropertyType Type { get; set; }
         public string? Description { get; set; }
 
-
+        public ICollection<ScheduledTask> ScheduledTasks { get; set; } = new List<ScheduledTask>();
+        public ICollection<ActionTask> ActionTasks { get; set; } = new List<ActionTask>();
     }
 }
