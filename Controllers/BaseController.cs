@@ -7,10 +7,17 @@ namespace ShineSyncControl.Controllers
 {
     public class BaseController : ControllerBase
     {
+        private int? authorizedUserId = null;
+        private User? authorizedUser = null;
         protected User AuthorizedUser
         {
             get
             {
+                if(authorizedUser is not null)
+                {
+                    return authorizedUser;
+                }
+
                 int id = AuthorizedUserId;
 
                 User? user = DB.Users.SingleOrDefault(p => p.Id == id);
@@ -22,6 +29,7 @@ namespace ShineSyncControl.Controllers
                     Response.WriteAsync("Unauthorized").Wait();
                     throw new InvalidOperationException("This property accessible only for authorized users.");
                 }
+                authorizedUser = user;
 
                 return user;
             }
@@ -31,6 +39,11 @@ namespace ShineSyncControl.Controllers
         {
             get
             {
+                if (authorizedUserId is not null)
+                {
+                    return authorizedUserId.Value;
+                }
+
                 var strId = HttpContext.User.Claims
                     .FirstOrDefault(p => p.Type == ClaimTypes.NameIdentifier)?.Value;
 
@@ -43,6 +56,8 @@ namespace ShineSyncControl.Controllers
                 {
                     throw new InvalidOperationException("This property accessible only for authorized users.");
                 }
+
+                authorizedUserId = id;
 
                 return id;
             }
