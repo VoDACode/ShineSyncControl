@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using ShineSyncControl.Attributes;
 using ShineSyncControl.Models.DB;
 using ShineSyncControl.Models.Requests;
 using ShineSyncControl.Models.Responses;
@@ -109,6 +110,7 @@ namespace ShineSyncControl.Controllers
             return Ok(new BaseResponse.SuccessResponse());
         }
 
+        [AuthorizeAnyType]
         [HttpGet("check")]
         public IActionResult Check()
         {

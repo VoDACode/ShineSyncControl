@@ -1,0 +1,123 @@
+<div class="container">
+    <div class="row">
+        <div class="col-xxl-1 d-flex align-items-center device icon">
+            <img class="icon dark-mode text-center" src="/assets/img/{{device.type}}.png" alt="">
+        </div>
+        <div class="col align-self-center">
+            <div class="row">
+                <div class="col">
+                    <div class="row">
+                        <div class="col d-flex align-items-center justify-content-start">
+                            <span *ngIf="!editMode">{{device.name ?? '"Empty"'}}</span>
+                            <input *ngIf="editMode" type="text" class="form-control" [(ngModel)]="editedDevice.name">
+                        </div>
+                        <div class="col d-flex align-items-center justify-content-end edit-mode-box">
+                            <span>Edit mode</span>
+                            <app-switch [status]="editMode" (switch)="onEditClick($event)"></app-switch>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <hr>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <span>Online status. "Online" | last online</span>
+                    <hr>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <span *ngIf="!editMode">{{device.description ?? '"Empty"'}}</span>
+                    <input *ngIf="editMode" class="form-control" [(ngModel)]="editedDevice.description"/>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <hr>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <div>
+                <ul class="nav nav-tabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <a class="nav-link active" role="tab" data-bs-toggle="tab" href="#tab-1">Properties</a>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <a class="nav-link" role="tab" data-bs-toggle="tab" href="#tab-2">Actions</a>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <a class="nav-link" role="tab" data-bs-toggle="tab" href="#tab-3">Scheduled tasks</a>
+                    </li>
+                </ul>
+                <div class="tab-content">
+                    <div class="tab-pane active" role="tabpanel" id="tab-1">
+                        <div class="row">
+                            <div class="col">
+                                <div class="table-responsive">
+                                    <table class="table table-striped-columns">
+                                        <thead>
+                                            <tr>
+                                                <th style="width: 200px;">Name</th>
+                                                <th>Value</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr *ngFor="let property of deviceProperties">
+                                                <td>{{property.propertyName}}</td>
+                                                <td>
+                                                    <input type="text" class="form-control" [disabled]="property.isReadOnly" [(ngModel)]="property.value" *ngIf="property.type == 1">
+                                                    <input type="number" class="form-control" [disabled]="property.isReadOnly" [(ngModel)]="property.value" *ngIf="property.type == 2">
+                                                    <app-switch [disabled]="property.isReadOnly" [status]="property.value == '1'" *ngIf="property.type == 3"/>
+                                                    <input type="datetime-local" class="form-control" [disabled]="property.isReadOnly" [(ngModel)]="property.value" *ngIf="property.type == 4">
+                                                    <input type="date" class="form-control" [disabled]="property.isReadOnly" [(ngModel)]="property.value" *ngIf="property.type == 5">
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tab-pane" role="tabpanel" id="tab-2">
+                        <button class="btn btn-primary" type="button">Add new</button>
+                        <ul>
+                            <li *ngFor="let action of deviceActions">
+                                <a [routerLink]="['/action', action.id]">{{action.name}}</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="tab-pane" role="tabpanel" id="tab-3">
+                        <button class="btn btn-primary" type="button">Add new</button>
+                        <ul>
+                            <li>Item 1</li>
+                            <li>Item 2</li>
+                            <li>Item 3</li>
+                            <li>Item 4</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div [hidden]="!editMode" class="text-center justify-content-xxl-center align-items-xxl-center modal-window">
+    <div>
+        <div class="row">
+            <div class="col message">
+                <span>Save changes?</span>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col"><button class="btn btn-success" type="button" (click)="onSaveClick()">Save</button></div>
+            <div class="col"><button class="btn btn-danger" type="button" [disabled]="!hasChanges" (click)="onCancelClick()">Cancel</button></div>
+        </div>
+    </div>
+</div>

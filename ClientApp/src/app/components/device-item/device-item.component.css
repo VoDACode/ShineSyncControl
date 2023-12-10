@@ -1,0 +1,42 @@
+.root {
+    border-radius: 5px;
+    border-style: solid;
+    border-color: var(--bs-secondary-text-emphasis);
+    width: auto;
+    max-width: 256px;
+    min-width: 256px;
+    margin: 5px;
+}
+
+.root:hover {
+    border-color: var(--bs-primary);
+    cursor: pointer;
+}
+
+.root > .icon{
+    height: 192px;
+    position: relative;
+}
+
+i.icon {
+    font-size: 128px;
+    width: 250px;
+    height: 192px;
+}
+
+img{
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    height: 160px;
+}
+
+.icon>.col {
+    text-align: center;
+}
+
+.text>.col {
+    border-top-style: solid;
+    border-top-color: var(--bs-secondary-text-emphasis);
+}

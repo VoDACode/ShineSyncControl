@@ -1,0 +1,12 @@
+<div class="container root" [routerLink]="['/device', device.id]">
+    <div class="row icon">
+        <div class="col">
+            <img class="icon dark-mode" src="/assets/img/{{device.type}}.png" alt="">
+        </div>
+    </div>
+    <div class="row text">
+        <div class="col">
+            <label class="col-form-label">{{device.name ?? device.type}}</label>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,3 @@
+html[data-bs-theme='dark'] i.default-icon {
+    filter: invert(0.75);
+}

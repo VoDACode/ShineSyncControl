@@ -1,6 +1,6 @@
 ﻿[
   {
-    "type": "Relay",
+    "type": "relay",
     "properties": [
       {
         "propertyName": "status",
@@ -10,7 +10,7 @@
     ]
   },
   {
-    "type": "LightLevelSonsor",
+    "type": "light-sensor",
     "properties": [
       {
         "propertyName": "level",
@@ -20,7 +20,7 @@
     ]
   },
   {
-    "type": "MotionSensor",
+    "type": "motion-sensor",
     "properties": [
       {
         "propertyName": "action",
@@ -30,12 +30,37 @@
     ]
   },
   {
-    "type": "Switsh",
+    "type": "switch",
     "properties": [
       {
         "propertyName": "status",
         "isReadOnly": false,
         "type": 3
+      }
+    ]
+  },
+  {
+    "type": "blinds",
+    "properties": [
+      {
+        "propertyName": "status",
+        "isReadOnly": false,
+        "type": 3
+      },
+      {
+        "propertyName": "position",
+        "isReadOnly": false,
+        "type": 2
+      },
+      {
+        "propertyName": "tilt",
+        "isReadOnly": false,
+        "type": 2
+      },
+      {
+        "propertyName": "lightLevel",
+        "isReadOnly": true,
+        "type": 2
       }
     ]
   }

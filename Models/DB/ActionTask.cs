@@ -4,6 +4,8 @@ namespace ShineSyncControl.Models.DB
 {
     public class ActionTask
     {
+        [Key]
+        public int Id { get; set; }
         [Required]
         public int ActionId { get; set; }
         public ActionModel Action { get; set; }

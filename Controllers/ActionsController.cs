@@ -1,7 +1,7 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ShineSyncControl.Attributes;
+using ShineSyncControl.Enums;
 using ShineSyncControl.Models.DB;
 using ShineSyncControl.Models.Requests;
 using ShineSyncControl.Models.Responses;
@@ -20,16 +20,24 @@ namespace ShineSyncControl.Controllers
             this.taskEventWorker = taskEventWorker;
         }
 
+        [HttpGet("able")]
+        public IActionResult GetAble()
+        {
+            return Ok(new BaseResponse.SuccessResponse(taskEventWorker.Events));
+        }
+
         [AuthorizeAnyType]
         [HttpGet]
-        public IActionResult Get()
+        public async Task<IActionResult> Get()
         {
-            var events = DB.ActionTask
+            var events = await DB.ActionTask
                 .Include(p => p.WhenTrueTask)
                 .Include(p => p.WhenFalseTask)
-                .Include(p => p.Action).ThenInclude(p => p.Expression).ThenInclude(p => p.SubExpression);
+                .Include(p => p.Action)
+                .Where(p => p.Action.OwnerId == AuthorizedUserId)
+                .ToListAsync();
 
-            return Ok(events);
+            return Ok(new ActionTaskResponse(events));
         }
 
         [AuthorizeAnyType]
@@ -109,7 +117,68 @@ namespace ShineSyncControl.Controllers
             taskAction = (await DB.ActionTask.AddAsync(taskAction)).Entity;
             await DB.SaveChangesAsync();
 
-            return Ok(taskAction);
+            return Ok(new ActionTaskResponse(taskAction));
+        }
+
+        [AuthorizeAnyType(Type = AuthorizeType.Cookie | AuthorizeType.JWT)]
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Put(int id, [FromBody] ActionPutRequest action)
+        {
+            ActionTask? actionTask = await DB.ActionTask
+                .Include(p => p.Action).ThenInclude(p => p.Expression).ThenInclude(p => p.SubExpression)
+                .Include(p => p.WhenTrueTask)
+                .Include(p => p.WhenFalseTask)
+                .FirstOrDefaultAsync(p => p.Id == id);
+            if (actionTask is null)
+            {
+                return NotFound(new BaseResponse.ErrorResponse($"Action '{id}' not found"));
+            }
+            if (actionTask.Action.OwnerId != AuthorizedUserId)
+            {
+                return Unauthorized(new BaseResponse.ErrorResponse($"Action '{id}' not found"));
+            }
+            if (action.Name is not null)
+            {
+                actionTask.Action.Name = action.Name;
+            }
+            if (action.Description is not null)
+            {
+                actionTask.Action.Description = action.Description;
+            }
+            
+            if (action.WhenTrueTaskId is not null)
+            {
+                TaskModel? task = await DB.Tasks.Include(p => p.Device).FirstOrDefaultAsync(p => p.Id == action.WhenTrueTaskId);
+                if (task is null)
+                {
+                    return NotFound(new BaseResponse.ErrorResponse($"Task '{action.WhenTrueTaskId}' not found"));
+                }
+                if (task.Device.OwnerId != AuthorizedUserId)
+                {
+                    return Unauthorized(new BaseResponse.ErrorResponse($"Task '{action.WhenTrueTaskId}' not found"));
+                }
+
+                actionTask.WhenTrueTask = task;
+            }
+
+            if (action.WhenFalseTaskId is not null)
+            {
+                TaskModel? task = await DB.Tasks.Include(p => p.Device).FirstOrDefaultAsync(p => p.Id == action.WhenFalseTaskId);
+                if (task is null)
+                {
+                    return NotFound(new BaseResponse.ErrorResponse($"Task '{action.WhenFalseTaskId}' not found"));
+                }
+                if (task.Device.OwnerId != AuthorizedUserId)
+                {
+                    return Unauthorized(new BaseResponse.ErrorResponse($"Task '{action.WhenFalseTaskId}' not found"));
+                }
+
+                actionTask.WhenTrueTask = task;
+            }
+
+            await DB.SaveChangesAsync();
+
+            return Ok(new ActionTaskResponse(actionTask));
         }
 
         private async Task<IActionResult?> handelTaskPostRequest(TaskPostRequest task, Action<TaskModel> action)
@@ -151,6 +220,63 @@ namespace ShineSyncControl.Controllers
             await DB.SaveChangesAsync();
             action(taskModel);
 
+            return null;
+        }
+
+        private async Task<IActionResult?> handelTaskPutRequest(TaskPutRequest task, Action<TaskModel> action)
+        {
+            var taskModel = await DB.Tasks.SingleOrDefaultAsync(p => p.Id == task.Id);
+            if (taskModel is null)
+            {
+                return BadRequest(new BaseResponse.ErrorResponse($"Tasks '{task.Id}' not found"));
+            }
+
+            if (task.DevicePropertyId is not null && task.DeviceId is not null)
+            {
+                Device? device = await DB.Devices.FirstOrDefaultAsync(p => p.Id == task.DeviceId);
+                if (device is null)
+                {
+                    return NotFound(new BaseResponse.ErrorResponse($"Device '{task.DeviceId}' not found"));
+                }
+                taskModel.DeviceId = device.Id;
+
+                DeviceProperty? property = await DB.DeviceProperties.FirstOrDefaultAsync(p => p.DeviceId == task.DeviceId && p.Id == task.DevicePropertyId);
+                if (property is null)
+                {
+                    return NotFound(new BaseResponse.ErrorResponse($"Property '{task.DevicePropertyId}' not found"));
+                }
+
+                if(property.DeviceId != device.Id)
+                {
+                    return NotFound(new BaseResponse.ErrorResponse($"Device '{task.DeviceId}' not found property '{task.DevicePropertyId}'"));
+                }
+
+                if (task.Type != property.Type)
+                {
+                    return BadRequest(new BaseResponse.ErrorResponse($"Invalid data type. Expected '{Enum.GetName(property.Type)}'"));
+                }
+
+                taskModel.DevicePropertyId = property.Id;
+            }
+
+            if (!taskEventWorker.Events.Contains(task.Event))
+            {
+                return BadRequest(new BaseResponse.ErrorResponse($"Event '{task.Event}' not found"));
+            }
+
+            if(task.Value is not null && task.Type is not null)
+            {
+                taskModel.Value = task.Value;
+                taskModel.Type = task.Type.Value;
+            }
+
+            if(task.Description is not null)
+            {
+                taskModel.Description = task.Description;
+            }
+
+            await DB.SaveChangesAsync();
+            action(taskModel);
             return null;
         }
     }

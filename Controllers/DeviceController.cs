@@ -243,6 +243,30 @@ namespace ShineSyncControl.Controllers
             return Ok(new DevicePropertyResponse(device.Properties));
         }
 
+        [AuthorizeAnyType(Type = AuthorizeType.User)]
+        [HttpGet("{deviceId}/actions")]
+        public async Task<IActionResult> GetActions([FromRoute] string deviceId)
+        {
+            Device? device = await DB.Devices.SingleOrDefaultAsync(d => d.Id == deviceId);
+            if (device is null)
+            {
+                return NotFound(new BaseResponse.ErrorResponse($"Device '{deviceId}' not found"));
+            }
+            if (device.OwnerId != AuthorizedUserId)
+            {
+                return BadRequest(new BaseResponse.ErrorResponse("Access is denied"));
+            }
+
+            var events = await DB.ActionTask
+                .Include(p => p.WhenTrueTask)
+                .Include(p => p.WhenFalseTask)
+                .Include(p => p.Action)
+                .Where(p => p.WhenTrueTask.DeviceId == deviceId || p.WhenFalseTask.DeviceId == deviceId)
+                .ToListAsync();
+
+            return Ok(new ActionTaskResponse(events));
+        }
+
         [AuthorizeAnyType]
         [HttpGet("{deviceId}/property/{propertyName}")]
         public async Task<IActionResult> GetProperty([FromRoute] string deviceId, [FromRoute] string propertyName, [FromHeader(Name = "Token")] string? token)
@@ -275,6 +299,39 @@ namespace ShineSyncControl.Controllers
         {
             var devices = await DB.Devices.Where(d => d.OwnerId == AuthorizedUserId).ToListAsync();
             return Ok(new DeviceResponse(devices));
+        }
+
+        [AuthorizeAnyType]
+        [HttpGet("{deviceId}")]
+        public async Task<IActionResult> GetDevice([FromRoute] string deviceId)
+        {
+            Device? device = await DB.Devices.Where(d => d.Id == deviceId && d.OwnerId == AuthorizedUserId).SingleOrDefaultAsync();
+            if (device is null)
+            {
+                return NotFound(new BaseResponse.ErrorResponse($"Device '{deviceId}' not found"));
+            }
+            return Ok(new DeviceResponse(device));
+        }
+
+        [AuthorizeAnyType]
+        [HttpPut("{deviceId}")]
+        public async Task<IActionResult> UpdateDevice([FromRoute] string deviceId, [FromBody] UpdateDeviceRequest request)
+        {
+            Device? device = await DB.Devices.Where(d => d.Id == deviceId && d.OwnerId == AuthorizedUserId).SingleOrDefaultAsync();
+            if (device is null)
+            {
+                return NotFound(new BaseResponse.ErrorResponse($"Device '{deviceId}' not found"));
+            }
+            if (request.Name is not null)
+            {
+                device.Name = request.Name;
+            }
+            if (request.Description is not null)
+            {
+                device.Description = request.Description;
+            }
+            await DB.SaveChangesAsync();
+            return Ok(new DeviceResponse(device));
         }
     }
 }

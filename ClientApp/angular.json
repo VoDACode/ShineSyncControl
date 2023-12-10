@@ -31,9 +31,16 @@
             ],
             "styles": [
               "node_modules/bootstrap/dist/css/bootstrap.min.css",
+              "src/assets/bootstrap/css/bootstrap.min.css",
+              "src/assets/css/styles.min.css",
+              "src/assets/fonts/ionicons.min.css",
+              "src/assets/css/general.css",
               "src/styles.css"
             ],
-            "scripts": []
+            "scripts": [
+              "src/assets/bootstrap/js/bootstrap.min.js",
+              "src/assets/js/theme.js"
+            ]
           },
           "configurations": {
             "production": {
