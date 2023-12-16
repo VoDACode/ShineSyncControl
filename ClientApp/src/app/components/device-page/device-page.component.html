@@ -25,7 +25,7 @@
             </div>
             <div class="row">
                 <div class="col">
-                    <span>Online status. "Online" | last online</span>
+                    <span>{{onlineStatus}}</span>
                     <hr>
                 </div>
             </div>
@@ -72,11 +72,11 @@
                                             <tr *ngFor="let property of deviceProperties">
                                                 <td>{{property.propertyName}}</td>
                                                 <td>
-                                                    <input type="text" class="form-control" [disabled]="property.isReadOnly" [(ngModel)]="property.value" *ngIf="property.type == 1">
-                                                    <input type="number" class="form-control" [disabled]="property.isReadOnly" [(ngModel)]="property.value" *ngIf="property.type == 2">
-                                                    <app-switch [disabled]="property.isReadOnly" [status]="property.value == '1'" *ngIf="property.type == 3"/>
-                                                    <input type="datetime-local" class="form-control" [disabled]="property.isReadOnly" [(ngModel)]="property.value" *ngIf="property.type == 4">
-                                                    <input type="date" class="form-control" [disabled]="property.isReadOnly" [(ngModel)]="property.value" *ngIf="property.type == 5">
+                                                    <input type="text" class="form-control" (change)="onSetProperty(property)" [disabled]="property.isReadOnly" [(ngModel)]="property.value" *ngIf="property.type == 1">
+                                                    <input type="number" class="form-control" (change)="onSetProperty(property)" [disabled]="property.isReadOnly" [(ngModel)]="property.value" *ngIf="property.type == 2">
+                                                    <app-switch [disabled]="property.isReadOnly" (switch)="onSetProperty(property, $event)" [status]="property.value == '1'" *ngIf="property.type == 3"/>
+                                                    <input type="datetime-local" class="form-control" (change)="onSetProperty(property)" [disabled]="property.isReadOnly" [(ngModel)]="property.value" *ngIf="property.type == 4">
+                                                    <input type="date" class="form-control" (change)="onSetProperty(property)" [disabled]="property.isReadOnly" [(ngModel)]="property.value" *ngIf="property.type == 5">
                                                 </td>
                                             </tr>
                                         </tbody>

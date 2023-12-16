@@ -1,5 +1,4 @@
 export class DevicePropertyModel{
-    public id: number = 0;
     public deviceId: string = '';
     public propertyName: string = '';
     public value: string = '';

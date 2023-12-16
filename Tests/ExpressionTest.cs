@@ -41,12 +41,11 @@ namespace ShineSyncControl.Tests
             };
             lightLevelSencor_level = new DeviceProperty
             {
-                Id = 1,
                 DeviceId = lightLevelSencor.Id,
                 Device = lightLevelSencor,
                 IsReadOnly = true,
                 PropertyLastSync = DateTime.UtcNow,
-                PropertyName = "level",
+                Name = "level",
                 Type = PropertyType.Number,
                 PropertyUnit = null
             };
@@ -68,12 +67,11 @@ namespace ShineSyncControl.Tests
             };
             motionSensor_action = new DeviceProperty
             {
-                Id = 1,
                 DeviceId = motionSensor.Id,
                 Device = motionSensor,
                 IsReadOnly = true,
                 PropertyLastSync = DateTime.UtcNow,
-                PropertyName = "action",
+                Name = "action",
                 Type = PropertyType.Boolean,
                 PropertyUnit = null
             };
@@ -95,12 +93,11 @@ namespace ShineSyncControl.Tests
             };
             DeviceProperty relay_status = new DeviceProperty
             {
-                Id = 1,
                 DeviceId = motionSensor.Id,
                 Device = motionSensor,
                 IsReadOnly = false,
                 PropertyLastSync = DateTime.UtcNow,
-                PropertyName = "status",
+                Name = "status",
                 Type = PropertyType.Boolean,
                 PropertyUnit = null
             };
@@ -156,7 +153,7 @@ namespace ShineSyncControl.Tests
                 Device = relay,
                 DeviceId = relay.Id,
                 DeviceProperty = relay_status,
-                DevicePropertyId = relay_status.Id,
+                DevicePropertyName = relay_status.Name,
                 EventName = "set",
                 Value = "0",
                 Type = PropertyType.Boolean,
@@ -169,7 +166,7 @@ namespace ShineSyncControl.Tests
                 Device = relay,
                 DeviceId = relay.Id,
                 DeviceProperty = relay_status,
-                DevicePropertyId = relay_status.Id,
+                DevicePropertyName = relay_status.Name,
                 EventName = "set",
                 Value = "1",
                 Type = PropertyType.Boolean,

@@ -6,6 +6,7 @@ export class DeviceModel {
     public description: string | undefined | null;
     public isActive: boolean = false;
     public lastSync: Date | undefined;
+    public lastOnline: Date | undefined;
     public registeredAt: Date = new Date();
     public activatedAt: Date | undefined;
 }

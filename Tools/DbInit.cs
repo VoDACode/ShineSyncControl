@@ -77,7 +77,7 @@ namespace ShineSyncControl.Tools
                             Device = dbDevice,
                             DeviceId = dbDevice.Id,
                             IsReadOnly = prop.IsReadOnly,
-                            PropertyName = prop.PropertyName,
+                            Name = prop.PropertyName,
                             PropertyUnit = prop.PropertyUnit,
                             Type = prop.Type
                         };

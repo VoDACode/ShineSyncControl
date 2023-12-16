@@ -5,6 +5,8 @@ VisualStudioVersion = 17.7.34031.279
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ShineSyncControl", "ShineSyncControl.csproj", "{8F25389F-906A-47E7-B42F-1069F6904C9E}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VoDA.WebSockets", "..\VoDA.WebSockets\VoDA.WebSockets\VoDA.WebSockets.csproj", "{9AB619F4-4A6A-400B-960A-E2268C4CAA3A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{8F25389F-906A-47E7-B42F-1069F6904C9E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8F25389F-906A-47E7-B42F-1069F6904C9E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8F25389F-906A-47E7-B42F-1069F6904C9E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9AB619F4-4A6A-400B-960A-E2268C4CAA3A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9AB619F4-4A6A-400B-960A-E2268C4CAA3A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9AB619F4-4A6A-400B-960A-E2268C4CAA3A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9AB619F4-4A6A-400B-960A-E2268C4CAA3A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

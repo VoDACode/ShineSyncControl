@@ -1,7 +1,7 @@
 import { BrowserModule } from '@angular/platform-browser';
-import { NgModule } from '@angular/core';
+import { LOCALE_ID, NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { HttpClientModule } from '@angular/common/http';
+import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { RouterModule } from '@angular/router';
 
 import { AppComponent } from './app.component';
@@ -13,6 +13,12 @@ import { DeviceItemComponent } from './components/device-item/device-item.compon
 import { DevicePageComponent } from './components/device-page/device-page.component';
 import { SwitchComponent } from './components/switch/switch.component';
 import { AuthGuardService } from './auth.guard';
+
+// export function HttpLoaderFactory(http: HttpClient) {
+//   return new TranslateHttpLoader(http,
+//     './assets/i18n/',
+//     '.json');
+// }
 
 @NgModule({
   declarations: [
@@ -36,7 +42,7 @@ import { AuthGuardService } from './auth.guard';
       { path: 'device/:id', component: DevicePageComponent, canActivate: [AuthGuardService] },
     ])
   ],
-  providers: [AuthGuardService],
+  providers: [AuthGuardService, { provide: LOCALE_ID, useValue: 'uk-UA' }],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

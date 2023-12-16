@@ -21,6 +21,7 @@ export class LoginComponent {
 
   public login() {
     this.authApiService.login(this.email, this.password).subscribe(res => {
+      console.log(res);
       if (res.success) {
         this.router.navigate(['/home']);
       } else {

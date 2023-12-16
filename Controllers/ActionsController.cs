@@ -80,17 +80,18 @@ namespace ShineSyncControl.Controllers
 
             do
             {
-                var property = await DB.DeviceProperties.SingleOrDefaultAsync(p => p.Id == expressionPost.DevicePropertyId && p.DeviceId == expressionPost.DeviceId);
+                var property = await DB.DeviceProperties.SingleOrDefaultAsync(p => p.DeviceId == expressionPost.DeviceId && p.Name == expressionPost.DeviceProperty);
 
                 if (property is null)
                 {
-                    return BadRequest(new BaseResponse.ErrorResponse($"Property '{expressionPost.DeviceId}.{expressionPost.DevicePropertyId}' not found"));
+                    return BadRequest(new BaseResponse.ErrorResponse($"Property '{expressionPost.DeviceId}.{expressionPost.DeviceProperty}' not found"));
                 }
 
                 var expression = (await DB.Expressions.AddAsync(new Expression()
                 {
                     DeviceId = property.DeviceId,
-                    DevicePropertyId = property.Id,
+                    DeviceProperty = property,
+                    DevicePropertyName = property.Name,
                     Value = expressionPost.Value,
                     Type = expressionPost.Type,
                     Operator = expressionPost.Operator,
@@ -189,10 +190,10 @@ namespace ShineSyncControl.Controllers
                 return NotFound(new BaseResponse.ErrorResponse($"Device '{task.DeviceId}' not found"));
             }
 
-            DeviceProperty? whenTrueTaskProperty = await DB.DeviceProperties.FirstOrDefaultAsync(p => p.DeviceId == task.DeviceId && p.Id == task.DevicePropertyId);
-            if (whenTrueTaskProperty is null)
+            DeviceProperty? property = await DB.DeviceProperties.FirstOrDefaultAsync(p => p.DeviceId == task.DeviceId && p.Name == task.DevicePropertyName);
+            if (property is null)
             {
-                return NotFound(new BaseResponse.ErrorResponse($"Property '{task.DevicePropertyId}' not found"));
+                return NotFound(new BaseResponse.ErrorResponse($"Property '{task.DevicePropertyName}' not found"));
             }
 
             if (!taskEventWorker.Events.Contains(task.Event))
@@ -200,9 +201,9 @@ namespace ShineSyncControl.Controllers
                 return BadRequest(new BaseResponse.ErrorResponse($"Event '{task.Event}' not found"));
             }
 
-            if (task.Type != whenTrueTaskProperty.Type)
+            if (task.Type != property.Type)
             {
-                return BadRequest(new BaseResponse.ErrorResponse($"Invalid data type. Expected '{Enum.GetName(whenTrueTaskProperty.Type)}'"));
+                return BadRequest(new BaseResponse.ErrorResponse($"Invalid data type. Expected '{Enum.GetName(property.Type)}'"));
             }
 
             var taskModel = new TaskModel
@@ -210,7 +211,8 @@ namespace ShineSyncControl.Controllers
                 Name = task.Name,
                 Description = task.Description,
                 DeviceId = device.Id,
-                DevicePropertyId = task.DevicePropertyId,
+                DevicePropertyName = task.DevicePropertyName,
+                DeviceProperty = property,
                 EventName = task.Event,
                 Type = task.Type,
                 Value = task.Value
@@ -231,7 +233,7 @@ namespace ShineSyncControl.Controllers
                 return BadRequest(new BaseResponse.ErrorResponse($"Tasks '{task.Id}' not found"));
             }
 
-            if (task.DevicePropertyId is not null && task.DeviceId is not null)
+            if (task.DevicePropertyName is not null && task.DeviceId is not null)
             {
                 Device? device = await DB.Devices.FirstOrDefaultAsync(p => p.Id == task.DeviceId);
                 if (device is null)
@@ -240,15 +242,15 @@ namespace ShineSyncControl.Controllers
                 }
                 taskModel.DeviceId = device.Id;
 
-                DeviceProperty? property = await DB.DeviceProperties.FirstOrDefaultAsync(p => p.DeviceId == task.DeviceId && p.Id == task.DevicePropertyId);
+                DeviceProperty? property = await DB.DeviceProperties.FirstOrDefaultAsync(p => p.DeviceId == task.DeviceId && p.Name == task.DevicePropertyName);
                 if (property is null)
                 {
-                    return NotFound(new BaseResponse.ErrorResponse($"Property '{task.DevicePropertyId}' not found"));
+                    return NotFound(new BaseResponse.ErrorResponse($"Property '{task.DevicePropertyName}' not found"));
                 }
 
                 if(property.DeviceId != device.Id)
                 {
-                    return NotFound(new BaseResponse.ErrorResponse($"Device '{task.DeviceId}' not found property '{task.DevicePropertyId}'"));
+                    return NotFound(new BaseResponse.ErrorResponse($"Device '{task.DeviceId}' not found property '{task.DevicePropertyName}'"));
                 }
 
                 if (task.Type != property.Type)
@@ -256,7 +258,8 @@ namespace ShineSyncControl.Controllers
                     return BadRequest(new BaseResponse.ErrorResponse($"Invalid data type. Expected '{Enum.GetName(property.Type)}'"));
                 }
 
-                taskModel.DevicePropertyId = property.Id;
+                taskModel.DeviceProperty = property;
+                taskModel.DevicePropertyName = property.Name;
             }
 
             if (!taskEventWorker.Events.Contains(task.Event))

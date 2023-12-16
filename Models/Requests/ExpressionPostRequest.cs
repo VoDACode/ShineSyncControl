@@ -8,7 +8,7 @@ namespace ShineSyncControl.Models.Requests
         [Required]
         public string DeviceId { get; set; }
         [Required]
-        public long DevicePropertyId { get; set; }
+        public string DeviceProperty { get; set; }
         [Required]
         public ComparisonOperator Operator { get; set; }
         [Required]

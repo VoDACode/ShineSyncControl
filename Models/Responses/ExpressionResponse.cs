@@ -17,7 +17,7 @@ namespace ShineSyncControl.Models.Responses
         {
             public int Id { get; set; }
             public string DeviceId { get; set; }
-            public long DevicePropertyId { get; set; }
+            public string DeviceProperty { get; set; }
             public ComparisonOperator Operator { get; set; }
             public string? OperatorName => Enum.GetName(Operator);
             public string Value { get; set; }
@@ -31,7 +31,7 @@ namespace ShineSyncControl.Models.Responses
             {
                 Id = expression.Id;
                 DeviceId = expression.DeviceId;
-                DevicePropertyId = expression.DevicePropertyId;
+                DeviceProperty = expression.DevicePropertyName;
                 Operator = expression.Operator;
                 Value = expression.Value;
                 Type = expression.Type;

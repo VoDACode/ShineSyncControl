@@ -6,14 +6,13 @@ namespace ShineSyncControl.Models.DB
 {
     public class DeviceProperty : IDynamicValue
     {
-        [Key]
-        public long Id { get; set; }
         [Required]
+        [MaxLength(64)]
         public string DeviceId { get; set; }
         public Device Device { get; set; }
         [Required]
-        [MaxLength(50)]
-        public string PropertyName { get; set; }
+        [MaxLength(64)]
+        public string Name { get; set; }
         public bool IsReadOnly { get; set; }
         [Required]
         [MaxLength(255)]

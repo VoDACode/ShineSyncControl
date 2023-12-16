@@ -23,17 +23,17 @@ export class AuthApiService extends BaseApiService {
     return this.http.post<BaseResponse<any>>('/api/auth/login', {
       email,
       password
-    }).pipe(catchError(this.handleError));
+    }).pipe(catchError((e) => this.handleError<any>(e)));
   }
 
   public register(user: RegisterUserModel) {
     return this.http.post<BaseResponse<any>>('/api/auth/register', user)
-      .pipe(catchError(this.handleError));
+      .pipe(catchError((e) => this.handleError<any>(e)));
   }
 
   public logout() {
     return this.http.get<BaseResponse<any>>('/api/auth/logout')
-      .pipe(catchError(this.handleError));
+      .pipe(catchError((e) => this.handleError<any>(e)));
   }
 
   public check(): Observable<boolean> {

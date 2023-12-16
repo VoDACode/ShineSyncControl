@@ -5,6 +5,7 @@ namespace ShineSyncControl.Models.DB
     public class Device
     {
         [Key]
+        [MaxLength(64)]
         public string Id { get; set; }
         public int? OwnerId { get; set; } = null;
         public User? Owner { get; set;} = null;
@@ -17,6 +18,7 @@ namespace ShineSyncControl.Models.DB
         [MaxLength(1024)]
         public string Token { get; set; }
         public bool IsActive { get; set; } = false;
+        public DateTime? LastOnline { get; set; } = null;
         public DateTime? LastSync { get; set; } = null;
         public DateTime RegisteredAt { get; set; } = DateTime.UtcNow;
         public DateTime? ActivatedAt { get; set; } = null;

@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
+using Newtonsoft.Json.Linq;
 using ShineSyncControl.Attributes;
 using ShineSyncControl.Enums;
 using ShineSyncControl.Models.DB;
@@ -55,7 +56,7 @@ namespace ShineSyncControl.Controllers
             var properties = request.Properties.Select(p => new DeviceProperty()
             {
                 DeviceId = device.Id,
-                PropertyName = p.PropertyName,
+                Name = p.PropertyName,
                 IsReadOnly = p.IsReadOnly,
                 Type = p.Type
             }).ToList();
@@ -173,7 +174,7 @@ namespace ShineSyncControl.Controllers
                 return BadRequest(new BaseResponse.ErrorResponse("Device is not registered"));
             }
 
-            DeviceProperty? property = await DB.DeviceProperties.Include(p => p.Device).FirstOrDefaultAsync(p => p.DeviceId == deviceId && p.PropertyName == propertyName);
+            DeviceProperty? property = await DB.DeviceProperties.Include(p => p.Device).FirstOrDefaultAsync(p => p.DeviceId == deviceId && p.Name == propertyName);
             if (property is null)
             {
                 return NotFound(new BaseResponse.ErrorResponse($"Property '{propertyName}' not found"));
@@ -194,12 +195,14 @@ namespace ShineSyncControl.Controllers
 
             await DB.SaveChangesAsync();
 
+            await cache.SetStringAsync($"device_{property.DeviceId}.{property.Name}.value", request.Value);
+
             var actionTasks = await DB.ActionTask
             .Include(a => a.WhenTrueTask).ThenInclude(p => p.DeviceProperty)
             .Include(a => a.WhenFalseTask).ThenInclude(p => p.DeviceProperty)
             .Include(a => a.Action).ThenInclude(p => p.Expression).ThenInclude(e => e.SubExpression).ThenInclude(p => p.DeviceProperty)
-            .Where(a => (a.Action.Expression.DeviceId == deviceId && a.Action.Expression.DevicePropertyId == property.Id) ||
-                        (a.Action.Expression.SubExpression != null && a.Action.Expression.SubExpression.DeviceId == deviceId && a.Action.Expression.SubExpression.DevicePropertyId == property.Id)
+            .Where(a => (a.Action.Expression.DeviceId == deviceId && a.Action.Expression.DevicePropertyName == property.Name) ||
+                        (a.Action.Expression.SubExpression != null && a.Action.Expression.SubExpression.DeviceId == deviceId && a.Action.Expression.SubExpression.DevicePropertyName == property.Name)
                       )
                 .ToListAsync();
 
@@ -273,7 +276,7 @@ namespace ShineSyncControl.Controllers
         {
             DeviceProperty? property = await DB.DeviceProperties
                 .Include(p => p.Device)
-                .Where(p => p.DeviceId == deviceId && p.PropertyName == propertyName)
+                .Where(p => p.DeviceId == deviceId && p.Name == propertyName)
                 .SingleOrDefaultAsync();
 
             if (property is null || propertyName is null)

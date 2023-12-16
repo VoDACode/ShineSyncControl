@@ -13,7 +13,7 @@ namespace ShineSyncControl.Services.DeviceCommand.Models.Responses
         public class View
         {
             public int Id { get; set; }
-            public long PropertyId { get; set; }
+            public string PropertyName { get; set; }
             public string Value { get; set; }
             public string Event { get; set; }
             public long Interval { get; set; }
@@ -22,7 +22,7 @@ namespace ShineSyncControl.Services.DeviceCommand.Models.Responses
             public View(ScheduledTask scheduledTask)
             {
                 Id = scheduledTask.Id;
-                PropertyId = scheduledTask.Task.DevicePropertyId;
+                PropertyName = scheduledTask.Task.DevicePropertyName;
                 Value = scheduledTask.Task.Value;
                 Event = scheduledTask.Task.EventName;
                 Interval = scheduledTask.Interval;

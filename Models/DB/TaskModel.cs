@@ -12,10 +12,11 @@ namespace ShineSyncControl.Models.DB
         [MaxLength(50)]
         public string Name { get; set; }
         [Required]
+        [MaxLength(64)]
         public string DeviceId { get; set; }
         public Device Device { get; set; }
         [Required]
-        public long DevicePropertyId { get; set; }
+        public string DevicePropertyName { get; set; }
         public DeviceProperty DeviceProperty { get; set; }
 
         [Required]

@@ -12,7 +12,7 @@ namespace ShineSyncControl.Models.Requests
         [Required]
         public string DeviceId { get; set; }
         [Required]
-        public long DevicePropertyId { get; set; }
+        public string DevicePropertyName { get; set; }
 
         [Required]
         [MaxLength(50)]

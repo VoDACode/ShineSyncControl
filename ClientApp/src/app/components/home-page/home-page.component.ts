@@ -14,8 +14,6 @@ export class HomePageComponent {
     this.deviceApiService.getDevices().subscribe(res => {
       if (res.success && res.data) {
         this.devices = res.data;
-      } else {
-        alert(res.message);
       }
     });
   }

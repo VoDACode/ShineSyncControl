@@ -55,12 +55,15 @@ namespace ShineSyncControl
             modelBuilder.Entity<Expression>()
                 .HasOne(e => e.DeviceProperty)
                 .WithMany()
-                .HasForeignKey(e => e.DevicePropertyId)
+                .HasForeignKey(e => new
+                {
+                    e.DevicePropertyName,
+                    e.DeviceId
+                })
                 .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<DeviceProperty>()
-               .HasIndex(x => new { x.DeviceId, x.PropertyName })
-               .IsUnique();
+               .HasKey(x => new { x.DeviceId, x.Name });
 
             modelBuilder.Entity<Models.DB.ActionModel>()
                 .HasOne(a => a.Owner)
@@ -77,7 +80,10 @@ namespace ShineSyncControl
             modelBuilder.Entity<Models.DB.TaskModel>()
                 .HasOne(t => t.DeviceProperty)
                 .WithMany()
-                .HasForeignKey(t => t.DevicePropertyId)
+                .HasForeignKey(t => new
+                {
+                    t.DevicePropertyName, t.DeviceId
+                })
                 .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<ActionTask>()
@@ -132,11 +138,13 @@ namespace ShineSyncControl
                     x.UserId,
                     x.GroupId
                 });
+
             modelBuilder.Entity<UserGroup>()
                 .HasOne(ug => ug.User)
                 .WithMany()
                 .HasForeignKey(ug => ug.UserId)
                 .OnDelete(DeleteBehavior.NoAction);
+
             modelBuilder.Entity<UserGroup>()
                 .HasOne(ug => ug.Group)
                 .WithMany()

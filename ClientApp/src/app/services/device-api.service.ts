@@ -17,26 +17,30 @@ export class DeviceApiService extends BaseApiService {
   }
 
   public getDevices() {
-    return this.http.get<BaseResponse<DeviceModel[]>>('/api/device').pipe(catchError(this.handleError));
+    return this.http.get<BaseResponse<DeviceModel[]>>('/api/device').pipe(catchError((e) => this.handleError<DeviceModel[]>(e)));
   }
 
   public getDevice(id: string) {
-    return this.http.get<BaseResponse<DeviceModel>>(`/api/device/${id}`).pipe(catchError(this.handleError));
+    return this.http.get<BaseResponse<DeviceModel>>(`/api/device/${id}`).pipe(catchError((e) => this.handleError<DeviceModel>(e)));
   }
 
   public updateDevice(device: DeviceModel) {
-    return this.http.put<BaseResponse<DeviceModel>>(`/api/device/${device.id}`, device).pipe(catchError(this.handleError));
+    return this.http.put<BaseResponse<DeviceModel>>(`/api/device/${device.id}`, device).pipe(catchError((e) => this.handleError<DeviceModel>(e)));
   }
 
   public getDeviceProperties(id: string) {
-    return this.http.get<BaseResponse<DevicePropertyModel[]>>(`/api/device/${id}/property`).pipe(catchError(this.handleError));
+    return this.http.get<BaseResponse<DevicePropertyModel[]>>(`/api/device/${id}/property`).pipe(catchError((e) => this.handleError<DevicePropertyModel[]>(e)));
   }
 
   public getDeviceProperty(id: string, propertyId: string) {
-    return this.http.get<BaseResponse<DevicePropertyModel>>(`/api/device/${id}/property/${propertyId}`).pipe(catchError(this.handleError));
+    return this.http.get<BaseResponse<DevicePropertyModel>>(`/api/device/${id}/property/${propertyId}`).pipe(catchError((e) => this.handleError<DevicePropertyModel>(e)));
   }
 
   public getDeviceActions(id: string) {
-    return this.http.get<BaseResponse<ShortActionModel[]>>(`/api/device/${id}/actions`).pipe(catchError(this.handleError));
+    return this.http.get<BaseResponse<ShortActionModel[]>>(`/api/device/${id}/actions`).pipe(catchError((e) => this.handleError<ShortActionModel[]>(e)));
+  }
+
+  public setProperty(id: string, propertyName: string, value: any) {
+    return this.http.put<BaseResponse<DevicePropertyModel>>(`/api/device/${id}/property/${propertyName}`, { value: String(value) }).pipe(catchError((e) => this.handleError<DevicePropertyModel>(e)));
   }
 }
