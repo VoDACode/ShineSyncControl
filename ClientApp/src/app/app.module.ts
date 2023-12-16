@@ -42,7 +42,7 @@ import { AuthGuardService } from './auth.guard';
       { path: 'device/:id', component: DevicePageComponent, canActivate: [AuthGuardService] },
     ])
   ],
-  providers: [AuthGuardService, { provide: LOCALE_ID, useValue: 'uk-UA' }],
+  providers: [],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
