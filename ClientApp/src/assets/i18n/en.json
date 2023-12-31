@@ -133,7 +133,10 @@
   "label": {
     "edit-mode": "Edit mode",
     "empty": "Empty",
-    "value": "Value"
+    "value": "Value",
+    "question": {
+      "save-changes": "Save changes?"
+    }
   },
   "select": {
     "device-type": "Select device type",
@@ -148,5 +151,8 @@
         "or": "Or"
       }
     }
+  },
+  "message": {
+    "device-registered-successfully": "Device registered successfully!\nDownloading configuration file..."
   }
 }

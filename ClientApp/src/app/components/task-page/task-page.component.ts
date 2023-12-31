@@ -47,9 +47,10 @@ export class TaskPageComponent {
     this.route.params.subscribe(params => {
       this.id = params['id'];
       this.returnTo = params['returnTo'];
-      this.loadDevices();
       if (!this.isNew) {
         this.loadTask();
+      }else{
+        this.loadDevices();
       }
     });
     this.actionApiService.getAbleEvents().subscribe(events => {
@@ -91,6 +92,7 @@ export class TaskPageComponent {
     this.taskApiService.getTask(Number(this.id)).subscribe(task => {
       if (task.success && task.data != null) {
         this.task = task.data;
+        this.loadDevices();
         this.task.property.value = this.task.value;
         this.originalTask = JSON.stringify(this.task);
       }

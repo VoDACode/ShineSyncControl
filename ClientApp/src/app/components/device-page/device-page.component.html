@@ -107,6 +107,6 @@
         </div>
     </div>
 </div>
-<app-save-changes-model [visible]="editMode" [message]="'Save changes?'" [yesText]="'Save'" [noText]="'Cancel'"
+<app-save-changes-model [visible]="editMode" [message]="'label.question.save-changes' | translate" [yesText]="'button.yes' | translate" [noText]="'button.no' | translate"
     [disableYes]="!hasChanges" (yes)="onSaveClick()" (no)="onCancelClick()">
 </app-save-changes-model>

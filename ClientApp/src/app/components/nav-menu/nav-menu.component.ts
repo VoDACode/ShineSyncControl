@@ -10,11 +10,14 @@ import { UserApiService } from 'src/app/services/user-api.service';
   styleUrls: ['./nav-menu.component.css']
 })
 export class NavMenuComponent {
-  siteLanguage = 'English';
   languageList = [
-    { code: 'en', label: 'English' },
-    { code: 'uk', label: 'Ukrainian' },
+    { code: 'en', label: '🇺🇸 English' },
+    { code: 'uk', label: '🇺🇦 Українська' },
   ];
+
+  public get currentLanguage(): string {
+    return this.translate.currentLang;
+  }
 
   isExpanded = false;
 
@@ -38,6 +41,11 @@ export class NavMenuComponent {
       }
       this.user = res.data;
     });
+
+    const language = localStorage.getItem('language');
+    if (language) {
+      this.translate.use(language);
+    }
   }
 
   collapse() {
@@ -48,15 +56,8 @@ export class NavMenuComponent {
     this.isExpanded = !this.isExpanded;
   }
 
-  changeSiteLanguage(localeCode: string): void {
-    const selectedLanguage = this.languageList
-      .find((language) => language.code === localeCode)
-      ?.label.toString();
-    if (selectedLanguage) {
-      this.siteLanguage = selectedLanguage;
-      this.translate.use(localeCode);
-    }
-    const currentLanguage = this.translate.currentLang;
-    console.log('currentLanguage', currentLanguage);
+  changeLanguage(language: string): void {
+    this.translate.use(language);
+    localStorage.setItem('language', language);
   }
 }

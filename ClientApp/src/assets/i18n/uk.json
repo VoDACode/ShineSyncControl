@@ -1,0 +1,158 @@
+{
+    "navbar": {
+        "navigation": {
+            "actions": {
+                "title": "Події"
+            },
+            "devices": {
+                "title": "Пристрої"
+            },
+            "login": {
+                "title": "Вхід"
+            },
+            "register": {
+                "title": "Реєстрація"
+            },
+            "add-device": {
+                "title": "Додати пристрій"
+            },
+            "register-new-device": {
+                "title": "Реєстрація пристроїв"
+            },
+            "device-groups": {
+                "title": "Групи пристроїв"
+            }
+        },
+        "toggle-navigation": "Увімкнути навігацію"
+    },
+    "theme": {
+        "switch": {
+            "auto": {
+                "title": "Система"
+            },
+            "dark": {
+                "title": "Темна"
+            },
+            "light": "Світла"
+        }
+    },
+    "page": {
+        "device": {
+            "navigation": {
+                "properties": "Властивості",
+                "actions": "Події",
+                "tasks": "Завдання"
+            },
+            "action": {
+                "button": {
+                    "add-new": "Створити подію"
+                }
+            },
+            "task": {
+                "button": {
+                    "add-new": "Створити завдання"
+                }
+            }
+        },
+        "add-device": {
+            "title": "Додати пристрій",
+            "enter-device-id": {
+                "title": "Вкажіть ID пристрою"
+            },
+            "waiting-for-device-activation": "Очікування активації пристрою ({{minutes}}:{{seconds}})..."
+        },
+        "action": {
+            "task": {
+                "title": "Завдання",
+                "when-true": {
+                    "title": "Коли правдива"
+                },
+                "when-false": {
+                    "title": "Коли хибна"
+                },
+                "button": {
+                    "create-new-task": "Створити нове завдання"
+                }
+            },
+            "expression": {
+                "title": "Вирази",
+                "button": {
+                    "add-new": "Додати новий"
+                }
+            }
+        },
+        "device-groups": {
+            "button": {
+                "add-device": "Додати пристрій",
+                "add-device-group": "Створити групу"
+            }
+        },
+        "device-register": {
+            "title": "Реєстрація пристроїв",
+            "properties": {
+                "title": "Властивості"
+            },
+            "button": {
+                "register": "Зареєструвати"
+            }
+        },
+        "log-in": {
+            "title": "Вхід",
+            "forgot-your-password": "Забули пароль?"
+        },
+        "register": {
+            "title": "Реєстрація"
+        },
+        "task": {
+            "message": {
+                "save-task": "Зберегли завдання?"
+            }
+        }
+    },
+    "input": {
+        "name": "Ім'я",
+        "description": "Опис",
+        "email": "Е-пошта",
+        "password": "Пароль",
+        "first-name": "Ім'я",
+        "last-name": "Прізвище",
+        "interval": "Інтервал",
+        "enabled": "Увімкнено"
+    },
+    "button": {
+        "save": "Зберегти",
+        "cancel": "Відмінити",
+        "delete": "Видалити",
+        "add": "Додати",
+        "edit": "Змінити",
+        "close": "Зачинити",
+        "create": "Створити",
+        "yes": "Так",
+        "no": "Ні"
+    },
+    "label": {
+        "edit-mode": "Режим редагування",
+        "empty": "Пусто",
+        "value": "Значення",
+        "question": {
+            "save-changes": "Зберегти зміни?"
+        }
+    },
+    "select": {
+        "device-type": "Оберіть тип пристрою",
+        "device": "Пристрій",
+        "device-property": "Властивість пристрою",
+        "event": "Подія"
+    },
+    "expression": {
+        "select": {
+            "expression-operator": {
+                "and": "Та",
+                "or": "Або"
+            }
+        }
+    },
+    "message": {
+        "device-registered-successfully": "Пристрій успішно зареєстровано\nЗавантажується файл конфігурації..."
+    }
+}

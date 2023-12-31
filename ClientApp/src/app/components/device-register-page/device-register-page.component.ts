@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
+import { TranslateService } from '@ngx-translate/core';
 import { DeviceTypeModel } from 'src/app/models/system.device.type.model';
 import { DeviceApiService } from 'src/app/services/device-api.service';
 import { PropertyType, SystemApiService } from 'src/app/services/system-api.service';
@@ -16,7 +17,7 @@ export class DeviceRegisterPageComponent {
 
   public propertyTypes: PropertyType[] = [];
 
-  constructor(private router: Router, private systemApiService: SystemApiService, private deviceApiService: DeviceApiService) {
+  constructor(private router: Router, private translate: TranslateService, private systemApiService: SystemApiService, private deviceApiService: DeviceApiService) {
     this.systemApiService.getPropertyTypes().subscribe((response) => {
       if (response.success && response.data != null) {
         this.propertyTypes = response.data.filter((x) => x.value != 0);
@@ -48,7 +49,7 @@ export class DeviceRegisterPageComponent {
         a.href = fileURL;
         a.download = `${response.data.id}.config.json`;
         a.click();
-        alert('Device registered successfully!\nDownloading configuration file.');
+        alert(this.translate.instant('message.device-registered-successfully'));
         document.body.removeChild(a);
       } else {
         alert(response.message);
