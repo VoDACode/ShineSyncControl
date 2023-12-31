@@ -57,8 +57,8 @@ namespace ShineSyncControl.Controllers
             .Include(a => a.WhenTrueTask).ThenInclude(p => p.DeviceProperty)
             .Include(a => a.WhenFalseTask).ThenInclude(p => p.DeviceProperty)
             .Include(a => a.Action).ThenInclude(p => p.Expression).ThenInclude(e => e.SubExpression).ThenInclude(p => p.DeviceProperty)
-            .Where(a => (a.Action.Expression.DeviceId == deviceId && a.Action.Expression.DevicePropertyName == property.Name) ||
-                        (a.Action.Expression.SubExpression != null && a.Action.Expression.SubExpression.DeviceId == deviceId && a.Action.Expression.SubExpression.DevicePropertyName == property.Name)
+            .Where(a => (a.Action.Expression.DevicePropertyId == property.Id) ||
+                        (a.Action.Expression.SubExpression != null && a.Action.Expression.SubExpression.DevicePropertyId == property.Id)
                       )
                 .ToListAsync();
 

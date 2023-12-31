@@ -1,0 +1,10 @@
+<input type="text" class="form-control" (change)="onSetProperty()" [disabled]="isReadOnly"
+    [(ngModel)]="property.value" *ngIf="property.type == 1">
+<input type="number" class="form-control" (change)="onSetProperty()" [disabled]="isReadOnly"
+    [(ngModel)]="property.value" *ngIf="property.type == 2">
+<app-switch [disabled]="isReadOnly" (switch)="onSetProperty($event)" [status]="property.value == '1'"
+    *ngIf="property.type == 3" />
+<input type="datetime-local" class="form-control" (change)="onSetProperty()" [disabled]="isReadOnly"
+    [(ngModel)]="property.value" *ngIf="property.type == 4">
+<input type="date" class="form-control" (change)="onSetProperty()" [disabled]="isReadOnly"
+    [(ngModel)]="property.value" *ngIf="property.type == 5">

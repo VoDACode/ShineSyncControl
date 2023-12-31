@@ -15,9 +15,8 @@ namespace ShineSyncControl.Models.Responses
         public class View
         {
             public int Id { get; set; }
-            public int ActionId { get; set; }
-            public int WhenTrueTaskId { get; set; }
-            public int WhenFalseTaskId { get; set; }
+            public TaskResponse.View WhenTrueTask { get; set; }
+            public TaskResponse.View? WhenFalseTask { get; set; } = null;
 
             public string? Description { get; set; }
             public string Name { get; set; }
@@ -25,9 +24,11 @@ namespace ShineSyncControl.Models.Responses
             public View(ActionTask actionTask)
             {
                 Id = actionTask.Id;
-                ActionId = actionTask.ActionId;
-                WhenFalseTaskId = actionTask.WhenFalseTaskId;
-                WhenTrueTaskId = actionTask.WhenTrueTaskId;
+                WhenTrueTask = new TaskResponse.View(actionTask.WhenTrueTask);
+                if (actionTask.WhenFalseTask is not null)
+                {
+                    WhenFalseTask = new TaskResponse.View(actionTask.WhenFalseTask);
+                }
                 Name = actionTask.Action.Name;
                 Description = actionTask.Action.Description;
             }

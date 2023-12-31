@@ -9,7 +9,7 @@ const PROXY_CONFIG = [
       "/api",
       "/swagger",
     ],
-    proxyTimeout: 10000,
+    proxyTimeout: 5 * 60 * 1000, // 5 minutes
     target: target,
     secure: false,
     headers: {

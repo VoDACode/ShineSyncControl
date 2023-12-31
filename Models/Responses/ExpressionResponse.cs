@@ -31,7 +31,7 @@ namespace ShineSyncControl.Models.Responses
             {
                 Id = expression.Id;
                 DeviceId = expression.DeviceId;
-                DeviceProperty = expression.DevicePropertyName;
+                DeviceProperty = expression.DeviceProperty.Name;
                 Operator = expression.Operator;
                 Value = expression.Value;
                 Type = expression.Type;

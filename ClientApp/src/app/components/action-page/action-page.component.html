@@ -1,0 +1,59 @@
+<div class="container content-box">
+    <form>
+        <div class="row">
+            <div class="col">
+                <div>
+                    <span style="display: block;">{{ 'input.name' | translate }}</span>
+                    <input class="form-control" type="text" style="display: block;max-width: 500px;" name="actionName"
+                        [(ngModel)]="action.name" />
+                </div>
+                <div>
+                    <span style="display: block;">{{ 'input.description' | translate }}</span>
+                    <input class="form-control" type="text" style="display: block;max-width: 750px;"
+                        name="actionDescription" [(ngModel)]="action.description" />
+                </div>
+            </div>
+        </div>
+        <hr />
+        <div class="row">
+            <div class="col">
+                <h1 style="text-align: center;">{{ 'page.action.task.title' | translate }}</h1>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                <div style="margin-top: 10px;">
+                    <span>{{ 'page.action.task.when-true.title' | translate }}</span>
+                    <select class="form-select">
+                        <option *ngFor="let item of tasks" value="{{item.id}}" [selected]="action.whenTrueTask.id == item.id" (click)="onSelectedTaskWhenTrueClick(item)">{{item.name}}</option>
+                    </select>
+                </div>
+                <div style="margin-top: 10px;">
+                    <span>{{ 'page.action.task.when-false.title' | translate }}</span>
+                    <select class="form-select">
+                        <option value="" [selected]="action.whenFalseTask == null" (click)="onSelectedTaskWhenFalseClick(null)">[{{ 'label.empty' | translate }}]</option>
+                        <option *ngFor="let item of tasks" value="{{item.id}}" [selected]="action.whenFalseTask?.id == item.id" (click)="onSelectedTaskWhenFalseClick(item)">{{item.name}}</option>
+                    </select>
+                </div>
+                <div style="margin-top: 10px;text-align: center;">
+                    <button class="btn btn-primary" type="button" (click)="onNewTask()">{{ 'page.action.task.button.create-new-task' | translate }}</button>
+                </div>
+            </div>
+        </div>
+        <hr />
+        <div class="row">
+            <div class="col">
+                <h1 style="text-align: center;">{{ 'page.action.expression.title' | translate }}</h1>
+            </div>
+        </div>
+        <app-expression *ngFor="let item of expressions; let i = index" [expression]="item" [index]="i + 1"
+            [hasNext]="hasNextExpression(i)" (delete)="onDeleteExpression(i)" [editMode]="true" [editOrigen]="true" [canRemove]="expressionCanBeRemoved(i)" (edited)="onExpressionEdited($event)"></app-expression>
+        <div class="row">
+            <div class="col" style="text-align: center;">
+                <button class="btn btn-primary" type="button" style="margin-top: 10px;" (click)="onAddExpression()">{{ 'page.action.expression.button.add-new' | translate }}</button>
+            </div>
+        </div>
+    </form>
+</div>
+<app-save-changes-model [visible]="isNew || hasChanges" [message]="'Create new action?'" [yesText]="'Create'" [noText]="'Back'"
+    [disableYes]="!canBeSaved" (yes)="onSave()" (no)="onBack()"></app-save-changes-model>

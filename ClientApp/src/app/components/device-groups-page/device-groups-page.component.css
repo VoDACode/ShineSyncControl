@@ -1,0 +1,14 @@
+.delete-box i.icon {
+    font-size: 24px;
+    height: 25px;
+    width: 25px;
+}
+
+.delete-box i.icon:hover {
+    cursor: pointer;
+    color: #ff0000;
+}
+
+.delete-box i.icon:active {
+    color: #aa0000;
+}

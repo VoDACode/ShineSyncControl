@@ -1,0 +1,17 @@
+<div [hidden]="!visible" class="text-center justify-content-xxl-center align-items-xxl-center modal-window">
+    <div>
+        <div class="row">
+            <div class="col message">
+                <span>{{message}}</span>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                <button class="btn btn-success" type="button" [disabled]="disableYes" (click)="onYes()">{{yesText}}</button>
+            </div>
+            <div class="col">
+                <button class="btn btn-danger" type="button" [disabled]="disableNo" (click)="onNo()">{{noText}}</button>
+            </div>
+        </div>
+    </div>
+</div>

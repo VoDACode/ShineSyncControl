@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace ShineSyncControl.Models.Requests
 {
@@ -9,11 +10,11 @@ namespace ShineSyncControl.Models.Requests
         public string? Description { get; set; }
 
         [Required]
+        [JsonPropertyName("expression")]
         public ExpressionPostRequest Expression { get; set; }
 
         [Required]
-        public TaskPostRequest WhenTrueTask { get; set; }
-        [Required]
-        public TaskPostRequest WhenFalseTask { get; set; }
+        public int WhenTrueTaskId { get; set; }
+        public int? WhenFalseTaskId { get; set; }
     }
 }

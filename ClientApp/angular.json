@@ -13,20 +13,10 @@
       "root": "",
       "sourceRoot": "src",
       "prefix": "app",
-      "i18n": {
-        "sourceLocale": "en-US",
-        "locales": {
-          "uk": {
-            "translation": "src/locale/message.uk-UA.xlf"
-          }
-        }
-      },
       "architect": {
         "build": {
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
-            "localize": true,
-            "aot": true,
             "progress": false,
             "outputPath": "dist",
             "index": "src/index.html",
@@ -140,14 +130,6 @@
               "vendorChunk": false,
               "buildOptimizer": true
             }
-          }
-        },
-        "extract-i18n": {
-          "builder": "@angular-devkit/build-angular:extract-i18n",
-          "options": {
-            "browserTarget": "ShineSyncControl:build",
-            "outputPath": "src/locale",
-            "format": "json"
           }
         }
       }

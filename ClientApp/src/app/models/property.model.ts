@@ -1,4 +1,6 @@
-export class DevicePropertyModel{
+import { BaseValueModel } from "./base.value.model";
+
+export class DevicePropertyModel extends BaseValueModel{
     public deviceId: string = '';
     public propertyName: string = '';
     public value: string = '';

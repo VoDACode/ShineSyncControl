@@ -1,6 +1,8 @@
-﻿using ShineSyncControl.Attributes;
+﻿using Microsoft.Extensions.Caching.Distributed;
+using ShineSyncControl.Attributes;
 using ShineSyncControl.Models.DB;
 using ShineSyncControl.Models.TaskEvents;
+using ShineSyncControl.Services.DataBus;
 using System.Reflection;
 
 namespace ShineSyncControl.Services.TaskEventWorker
@@ -12,8 +14,13 @@ namespace ShineSyncControl.Services.TaskEventWorker
         private List<string> eventsNames { get; } = new List<string>();
         public IReadOnlyList<string> Events => eventsNames;
 
-        public TaskEventWorker()
+        protected readonly IDistributedCache cache;
+        protected readonly IDataBus dataBus;
+
+        public TaskEventWorker(IDistributedCache cache, IDataBus dataBus)
         {
+            this.cache = cache;
+            this.dataBus = dataBus;
             LoadClasses();
         }
 
@@ -23,7 +30,8 @@ namespace ShineSyncControl.Services.TaskEventWorker
             {
                 return;
             }
-            baseEvent.Execute(taskModel);
+            var args = new TaskEventWorkerArgs(cache, dataBus);
+            baseEvent.Execute(taskModel, args);
         }
 
         private void LoadClasses()

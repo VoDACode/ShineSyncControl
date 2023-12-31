@@ -7,8 +7,8 @@ namespace ShineSyncControl.Models.DB
         [Key]
         [MaxLength(64)]
         public string Id { get; set; }
-        public int? OwnerId { get; set; } = null;
-        public User? Owner { get; set;} = null;
+        public int? UserId { get; set; } = null;
+        public User? User { get; set;} = null;
         [MaxLength(50)]
         public string? Name { get; set; } = null;
         public string? Type { get; set; } = null;
@@ -25,5 +25,6 @@ namespace ShineSyncControl.Models.DB
 
         public ICollection<DeviceProperty> Properties { get; set; } = new List<DeviceProperty>();
         public ICollection<TaskModel> Tasks { get; set; } = new List<TaskModel>();
+        public ICollection<DeviceGroup> Groups { get; set; } = new List<DeviceGroup>();
     }
 }

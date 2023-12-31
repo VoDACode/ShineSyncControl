@@ -23,6 +23,8 @@ namespace ShineSyncControl.Models.Responses
             public string Value { get; set; }
             public PropertyType Type { get; set; }
             public string? Description { get; set; }
+            public long? Interval { get; set; }
+            public bool Enabled { get; set; }
 
             public View(TaskModel task)
             {
@@ -34,6 +36,8 @@ namespace ShineSyncControl.Models.Responses
                 Value = task.Value;
                 Type = task.Type;
                 Description = task.Description;
+                Interval = task.Interval;
+                Enabled = task.Enabled;
             }
         }
     }

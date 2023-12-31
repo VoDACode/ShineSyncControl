@@ -13,11 +13,15 @@ namespace ShineSyncControl.Models.DB
         public string DeviceId { get; set; }
         public Device Device { get; set; }
         [Required]
-        [MaxLength(64)]
-        public string DevicePropertyName { get; set; }
+        [MaxLength(128)]
+        public string DevicePropertyId { get; set; }
         public DeviceProperty DeviceProperty { get; set; }
         [Required]
         public ComparisonOperator Operator { get; set; }
+
+        [Required]
+        public int UserId { get; set; }
+        public User User { get; set; }
 
         [Required]
         [MaxLength(255)]

@@ -9,6 +9,7 @@ using ShineSyncControl.Services.TaskEventWorker;
 
 namespace ShineSyncControl.Controllers
 {
+    [AuthorizeAnyType(Type = AuthorizeType.User)]
     [Route("api/actions")]
     [ApiController]
     public class ActionsController : BaseController
@@ -20,27 +21,56 @@ namespace ShineSyncControl.Controllers
             this.taskEventWorker = taskEventWorker;
         }
 
-        [HttpGet("able")]
+        [HttpGet("able-events")]
         public IActionResult GetAble()
         {
             return Ok(new BaseResponse.SuccessResponse(taskEventWorker.Events));
         }
 
-        [AuthorizeAnyType]
         [HttpGet]
         public async Task<IActionResult> Get()
         {
             var events = await DB.ActionTask
-                .Include(p => p.WhenTrueTask)
-                .Include(p => p.WhenFalseTask)
                 .Include(p => p.Action)
-                .Where(p => p.Action.OwnerId == AuthorizedUserId)
+                .Where(p => p.Action.UserId == AuthorizedUserId)
                 .ToListAsync();
 
-            return Ok(new ActionTaskResponse(events));
+            return Ok(new ActionTaskShortResponse(events));
         }
 
-        [AuthorizeAnyType]
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> Get(int id)
+        {
+            var action = await DB.ActionTask
+                .Include(p => p.WhenTrueTask).ThenInclude(p => p.Device)
+                .Include(p => p.WhenTrueTask).ThenInclude(p => p.DeviceProperty)
+                .Include(p => p.WhenFalseTask).ThenInclude(p => p.Device)
+                .Include(p => p.WhenFalseTask).ThenInclude(p => p.DeviceProperty)
+                .Include(p => p.Action)
+                .SingleOrDefaultAsync(p => p.Action.UserId == AuthorizedUserId && p.Id == id);
+            if (action is null)
+            {
+                return NotFound(new BaseResponse.ErrorResponse($"Action '{id}' not found"));
+            }
+            return Ok(new ActionTaskResponse(action));
+        }
+
+        [HttpGet("{id}/expressions")]
+        public async Task<IActionResult> GetExpression(int id)
+        {
+            var action = await DB.ActionTask
+                .Include(p => p.Action).ThenInclude(p => p.Expression).ThenInclude(p => p.SubExpression).ThenInclude(p => p.DeviceProperty)
+                .Include(p => p.Action).ThenInclude(p => p.Expression).ThenInclude(p => p.DeviceProperty)
+                .SingleOrDefaultAsync(p => p.Action.UserId == AuthorizedUserId && p.Id == id);
+            if (action is null)
+            {
+                return NotFound(new BaseResponse.ErrorResponse($"Action '{id}' not found"));
+            }
+            return Ok(new ExpressionResponse(action.Action.Expression));
+        }
+
+
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] ActionPostRequest action)
         {
@@ -48,8 +78,8 @@ namespace ShineSyncControl.Controllers
             {
                 Name = action.Name,
                 Description = action.Description,
-                Owner = AuthorizedUser,
-                OwnerId = AuthorizedUserId,
+                User = AuthorizedUser,
+                UserId = AuthorizedUserId,
             };
 
             var taskAction = new ActionTask()
@@ -57,18 +87,26 @@ namespace ShineSyncControl.Controllers
                 Action = actionModel
             };
 
-            // create task when true
-            var validateWhenTrueTaskResult = await handelTaskPostRequest(action.WhenTrueTask, (task) => taskAction.WhenTrueTask = task);
-            if (validateWhenTrueTaskResult is not null)
+            var whenTrueTask = await DB.Tasks
+                .Include(p => p.Device).ThenInclude(p => p.Properties)
+                .SingleOrDefaultAsync(p => p.Id == action.WhenTrueTaskId && p.UserId == AuthorizedUserId);
+            if (whenTrueTask is null)
             {
-                return validateWhenTrueTaskResult;
+                return BadRequest(new BaseResponse.ErrorResponse($"Task '{action.WhenTrueTaskId}' not found"));
             }
+            taskAction.WhenTrueTask = whenTrueTask;
 
-            // create task when false
-            var validateWhenFalseTaskResult = await handelTaskPostRequest(action.WhenFalseTask, (task) => taskAction.WhenFalseTask = task);
-            if (validateWhenFalseTaskResult is not null)
+
+            if (action.WhenFalseTaskId is not null)
             {
-                return validateWhenFalseTaskResult;
+                var whenFalseTask = await DB.Tasks
+                    .Include(p => p.Device).ThenInclude(p => p.Properties)
+                    .SingleOrDefaultAsync(p => p.Id == action.WhenFalseTaskId && p.UserId == AuthorizedUserId);
+                if (whenFalseTask is null)
+                {
+                    return BadRequest(new BaseResponse.ErrorResponse($"Task '{action.WhenFalseTaskId}' not found"));
+                }
+                taskAction.WhenFalseTask = whenFalseTask;
             }
 
             // create expressions
@@ -89,22 +127,23 @@ namespace ShineSyncControl.Controllers
 
                 var expression = (await DB.Expressions.AddAsync(new Expression()
                 {
+                    UserId = AuthorizedUserId,
                     DeviceId = property.DeviceId,
                     DeviceProperty = property,
-                    DevicePropertyName = property.Name,
+                    DevicePropertyId = property.Id,
                     Value = expressionPost.Value,
-                    Type = expressionPost.Type,
+                    Type = property.Type,
                     Operator = expressionPost.Operator,
                     ExpressionOperator = expressionPost.ExpressionOperator
                 })).Entity;
-                if(lastExpression is not null)
+                if (lastExpression is not null)
                 {
                     lastExpression.SubExpressionId = expression.SubExpressionId;
                     lastExpression.SubExpression = expression;
                 }
                 lastExpression = expression;
 
-                if(firstExpression is null)
+                if (firstExpression is null)
                     firstExpression = expression;
 
                 await DB.SaveChangesAsync();
@@ -121,20 +160,21 @@ namespace ShineSyncControl.Controllers
             return Ok(new ActionTaskResponse(taskAction));
         }
 
-        [AuthorizeAnyType(Type = AuthorizeType.Cookie | AuthorizeType.JWT)]
         [HttpPut("{id}")]
         public async Task<IActionResult> Put(int id, [FromBody] ActionPutRequest action)
         {
             ActionTask? actionTask = await DB.ActionTask
                 .Include(p => p.Action).ThenInclude(p => p.Expression).ThenInclude(p => p.SubExpression)
-                .Include(p => p.WhenTrueTask)
-                .Include(p => p.WhenFalseTask)
+                .Include(p => p.WhenTrueTask).ThenInclude(p => p.Device)
+                .Include(p => p.WhenTrueTask).ThenInclude(p => p.DeviceProperty)
+                .Include(p => p.WhenFalseTask).ThenInclude(p => p.Device)
+                .Include(p => p.WhenFalseTask).ThenInclude(p => p.DeviceProperty)
                 .FirstOrDefaultAsync(p => p.Id == id);
             if (actionTask is null)
             {
                 return NotFound(new BaseResponse.ErrorResponse($"Action '{id}' not found"));
             }
-            if (actionTask.Action.OwnerId != AuthorizedUserId)
+            if (actionTask.Action.UserId != AuthorizedUserId)
             {
                 return Unauthorized(new BaseResponse.ErrorResponse($"Action '{id}' not found"));
             }
@@ -146,7 +186,7 @@ namespace ShineSyncControl.Controllers
             {
                 actionTask.Action.Description = action.Description;
             }
-            
+
             if (action.WhenTrueTaskId is not null)
             {
                 TaskModel? task = await DB.Tasks.Include(p => p.Device).FirstOrDefaultAsync(p => p.Id == action.WhenTrueTaskId);
@@ -154,7 +194,7 @@ namespace ShineSyncControl.Controllers
                 {
                     return NotFound(new BaseResponse.ErrorResponse($"Task '{action.WhenTrueTaskId}' not found"));
                 }
-                if (task.Device.OwnerId != AuthorizedUserId)
+                if (task.Device.UserId != AuthorizedUserId)
                 {
                     return Unauthorized(new BaseResponse.ErrorResponse($"Task '{action.WhenTrueTaskId}' not found"));
                 }
@@ -169,12 +209,12 @@ namespace ShineSyncControl.Controllers
                 {
                     return NotFound(new BaseResponse.ErrorResponse($"Task '{action.WhenFalseTaskId}' not found"));
                 }
-                if (task.Device.OwnerId != AuthorizedUserId)
+                if (task.Device.UserId != AuthorizedUserId)
                 {
                     return Unauthorized(new BaseResponse.ErrorResponse($"Task '{action.WhenFalseTaskId}' not found"));
                 }
 
-                actionTask.WhenTrueTask = task;
+                actionTask.WhenFalseTask = task;
             }
 
             await DB.SaveChangesAsync();
@@ -182,105 +222,27 @@ namespace ShineSyncControl.Controllers
             return Ok(new ActionTaskResponse(actionTask));
         }
 
-        private async Task<IActionResult?> handelTaskPostRequest(TaskPostRequest task, Action<TaskModel> action)
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id)
         {
-            Device? device = await DB.Devices.FirstOrDefaultAsync(p => p.Id == task.DeviceId);
-            if (device is null)
+            ActionTask? actionTask = await DB.ActionTask
+                .Include(p => p.Action).ThenInclude(p => p.Expression).ThenInclude(p => p.SubExpression)
+                .Include(p => p.WhenTrueTask)
+                .Include(p => p.WhenFalseTask)
+                .FirstOrDefaultAsync(p => p.Id == id);
+            if (actionTask is null)
             {
-                return NotFound(new BaseResponse.ErrorResponse($"Device '{task.DeviceId}' not found"));
+                return NotFound(new BaseResponse.ErrorResponse($"Action '{id}' not found"));
             }
-
-            DeviceProperty? property = await DB.DeviceProperties.FirstOrDefaultAsync(p => p.DeviceId == task.DeviceId && p.Name == task.DevicePropertyName);
-            if (property is null)
+            if (actionTask.Action.UserId != AuthorizedUserId)
             {
-                return NotFound(new BaseResponse.ErrorResponse($"Property '{task.DevicePropertyName}' not found"));
+                return Unauthorized(new BaseResponse.ErrorResponse($"Action '{id}' not found"));
             }
-
-            if (!taskEventWorker.Events.Contains(task.Event))
-            {
-                return BadRequest(new BaseResponse.ErrorResponse($"Event '{task.Event}' not found"));
-            }
-
-            if (task.Type != property.Type)
-            {
-                return BadRequest(new BaseResponse.ErrorResponse($"Invalid data type. Expected '{Enum.GetName(property.Type)}'"));
-            }
-
-            var taskModel = new TaskModel
-            {
-                Name = task.Name,
-                Description = task.Description,
-                DeviceId = device.Id,
-                DevicePropertyName = task.DevicePropertyName,
-                DeviceProperty = property,
-                EventName = task.Event,
-                Type = task.Type,
-                Value = task.Value
-            };
-
-            taskModel = (await DB.Tasks.AddAsync(taskModel)).Entity;
+            DB.Expressions.RemoveRange(actionTask.Action.Expression);
+            DB.ActionTask.Remove(actionTask);
+            DB.Actions.Remove(actionTask.Action);
             await DB.SaveChangesAsync();
-            action(taskModel);
-
-            return null;
-        }
-
-        private async Task<IActionResult?> handelTaskPutRequest(TaskPutRequest task, Action<TaskModel> action)
-        {
-            var taskModel = await DB.Tasks.SingleOrDefaultAsync(p => p.Id == task.Id);
-            if (taskModel is null)
-            {
-                return BadRequest(new BaseResponse.ErrorResponse($"Tasks '{task.Id}' not found"));
-            }
-
-            if (task.DevicePropertyName is not null && task.DeviceId is not null)
-            {
-                Device? device = await DB.Devices.FirstOrDefaultAsync(p => p.Id == task.DeviceId);
-                if (device is null)
-                {
-                    return NotFound(new BaseResponse.ErrorResponse($"Device '{task.DeviceId}' not found"));
-                }
-                taskModel.DeviceId = device.Id;
-
-                DeviceProperty? property = await DB.DeviceProperties.FirstOrDefaultAsync(p => p.DeviceId == task.DeviceId && p.Name == task.DevicePropertyName);
-                if (property is null)
-                {
-                    return NotFound(new BaseResponse.ErrorResponse($"Property '{task.DevicePropertyName}' not found"));
-                }
-
-                if(property.DeviceId != device.Id)
-                {
-                    return NotFound(new BaseResponse.ErrorResponse($"Device '{task.DeviceId}' not found property '{task.DevicePropertyName}'"));
-                }
-
-                if (task.Type != property.Type)
-                {
-                    return BadRequest(new BaseResponse.ErrorResponse($"Invalid data type. Expected '{Enum.GetName(property.Type)}'"));
-                }
-
-                taskModel.DeviceProperty = property;
-                taskModel.DevicePropertyName = property.Name;
-            }
-
-            if (!taskEventWorker.Events.Contains(task.Event))
-            {
-                return BadRequest(new BaseResponse.ErrorResponse($"Event '{task.Event}' not found"));
-            }
-
-            if(task.Value is not null && task.Type is not null)
-            {
-                taskModel.Value = task.Value;
-                taskModel.Type = task.Type.Value;
-            }
-
-            if(task.Description is not null)
-            {
-                taskModel.Description = task.Description;
-            }
-
-            await DB.SaveChangesAsync();
-            action(taskModel);
-            return null;
+            return Ok(new BaseResponse.SuccessResponse());
         }
     }
 }

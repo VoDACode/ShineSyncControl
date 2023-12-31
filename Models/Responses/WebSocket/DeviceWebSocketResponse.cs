@@ -18,5 +18,7 @@ namespace ShineSyncControl.Models.Responses.WebSocket
             LastOnline = device.LastOnline ?? DateTime.MinValue;
             Properties = device.Properties.Select(p => new PropertyWebSocketResponse(p)).ToArray();
         }
+
+        public DeviceWebSocketResponse() { }
     }
 }

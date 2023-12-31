@@ -40,7 +40,7 @@ namespace ShineSyncControl.Services.DeviceCommand.Commands
             device.LastSync = DateTime.UtcNow;
             device.LastOnline = DateTime.UtcNow;
 
-            cache.SetString($"device_{device.Id}.{property}.value", value);
+            cache.SetString($"device_{deviceProperty.Id}.value", value);
 
             db.SaveChanges();
             context.Response(new BaseCommandResponse.SuccessResponse());

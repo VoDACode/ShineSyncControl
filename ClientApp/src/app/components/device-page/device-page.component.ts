@@ -6,6 +6,8 @@ import { ShortActionModel } from 'src/app/models/short.action.model';
 import { DeviceApiService } from 'src/app/services/device-api.service';
 import { environment } from 'src/environments/environment';
 import { WebSocketSubject, webSocket } from 'rxjs/webSocket';
+import { PropertyChange } from '../edit-property/edit-property.component';
+import { TaskModel } from 'src/app/models/task.model';
 
 @Component({
   selector: 'app-device-page',
@@ -16,6 +18,7 @@ export class DevicePageComponent implements OnInit, OnDestroy {
   public device: DeviceModel = new DeviceModel();
   public deviceProperties: DevicePropertyModel[] = [];
   public deviceActions: ShortActionModel[] = [];
+  public deviceTasks: TaskModel[] = [];
   public editedDevice: DeviceModel = new DeviceModel();
 
   private ws: WebSocketSubject<any> | undefined;
@@ -53,10 +56,7 @@ export class DevicePageComponent implements OnInit, OnDestroy {
     });
   }
   ngOnDestroy(): void {
-    console.log('Destroying websocket');
-    console.log(this.ws);
     this.ws?.complete();
-    console.log(this.ws);
     this.ws = undefined;
   }
 
@@ -73,6 +73,7 @@ export class DevicePageComponent implements OnInit, OnDestroy {
         this.ws.subscribe((msg) => this.onMessage(msg));
         this.loadProperties();
         this.loadActions();
+        this.loadTasks();
       } else {
         alert(res.message);
         this.router.navigate(['/home']);
@@ -103,6 +104,16 @@ export class DevicePageComponent implements OnInit, OnDestroy {
     });
   }
 
+  private loadTasks() {
+    this.deviceApiService.getDeviceTasks(this.deviceId).subscribe(res => {
+      if (res.success && res.data) {
+        this.deviceTasks = res.data;
+      } else {
+        alert(res.message);
+      }
+    });
+  }
+
   public onEditClick(status: boolean) {
     this.editMode = status;
     if (status) {
@@ -126,11 +137,13 @@ export class DevicePageComponent implements OnInit, OnDestroy {
     });
   }
 
-  public onSetProperty(property: DevicePropertyModel, value: any = null) {
-    value = value == null ? property.value : (value ? '1' : '0');
-    this.deviceApiService.setProperty(this.deviceId, property.propertyName, value).subscribe(res => {
+  public onSetProperty(event: PropertyChange) {
+    console.log(event);
+    event.value = event.value == null ? event.property.value : event.value;
+    console.log(event);
+    this.deviceApiService.setProperty(this.deviceId, event.property.propertyName, event.value).subscribe(res => {
       if (res.success && res.data) {
-        property.value = res.data.value;
+        event.property.value = res.data.value;
       } else {
         alert(res.message);
       }
@@ -147,9 +160,6 @@ export class DevicePageComponent implements OnInit, OnDestroy {
         x.value = property.value;
       }
     });
-
-    // let time = Number(data);
-    // this.device.lastOnline = new Date(time);
   }
 
 }

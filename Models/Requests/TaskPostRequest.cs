@@ -1,5 +1,4 @@
 ﻿using ShineSyncControl.Enums;
-using ShineSyncControl.Models.DB;
 using System.ComponentModel.DataAnnotations;
 
 namespace ShineSyncControl.Models.Requests
@@ -20,8 +19,10 @@ namespace ShineSyncControl.Models.Requests
         [Required]
         [MaxLength(255)]
         public string Value { get; set; }
-        [Required]
-        public PropertyType Type { get; set; }
+        [MaxLength(255)]
         public string? Description { get; set; }
+
+        public long? Interval { get; set; }
+        public bool Enabled { get; set; } = true;
     }
 }

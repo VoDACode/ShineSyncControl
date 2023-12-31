@@ -1,0 +1,54 @@
+<div class="container">
+    <form>
+        <div class="row">
+            <div class="col">
+                <h1 style="text-align: center;">{{ 'page.device-register.title' | translate }}</h1>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                <div>
+                    <span style="display: block;">{{ 'select.device-type' | translate }}</span>
+                    <select class="form-select">
+                        <option *ngFor="let item of deviceTypes" [value]="item.type" (click)="onSelectDeviceType(item)">
+                            {{item.type}}</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                <h1 style="text-align: center;">{{ 'page.device-register.properties.title' | translate }}</h1>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                <div class="row text-center d-xxl-flex align-items-xxl-center"
+                    *ngFor="let property of selectedDeviceType.properties" style="margin-top: 5px;">
+                    <div class="col">
+                        <input class="form-control" type="text" name="param-name" [value]="property.propertyName"
+                            readonly disabled />
+                    </div>
+                    <div class="col">
+                        <select class="form-select" readonly disabled>
+                            <option *ngFor="let item of propertyTypes" [value]="item.value"
+                                [selected]="property.typeCode == item.value">{{item.name}}</option>
+                        </select>
+                    </div>
+                    <div class="col">
+                        <input type="checkbox" name="PropertyIsReadOnly" [checked]="property.isReadOnly" disabled />
+                    </div>
+                    <div class="col">
+                        <input class="form-control" type="text" placeholder="{{ 'label.empty' | translate }}" name="property-units"
+                            [value]="property.units" disabled />
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col text-center" style="margin-top: 10px;">
+                <button class="btn btn-primary" type="button" (click)="onRegisterDevice()">{{ 'page.device-register.button.register' | translate }}</button>
+            </div>
+        </div>
+    </form>
+</div>

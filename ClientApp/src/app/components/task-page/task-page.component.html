@@ -1,0 +1,87 @@
+<div class="container">
+    <form>
+        <div class="row">
+            <div class="col">
+                <div>
+                    <span style="display: block;">{{ 'input.name' | translate }}</span>
+                    <input class="form-control" type="text" style="display: block;max-width: 500px;" name="taskName"
+                        [(ngModel)]="task.name" />
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                <div>
+                    <span style="display: block;">{{ 'input.description' | translate }}</span>
+                    <input class="form-control" type="text" style="display: block;max-width: 750px;"
+                        name="taskDescription" [(ngModel)]="task.description" />
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                <div>
+                    <span style="display: block;">{{ 'select.device' | translate }}</span>
+                    <select class="form-select">
+                        <option *ngFor="let item of devices" value="{{item.id}}" title="{{item.description}}"
+                            (click)="onSelectDevice(item)" [selected]="item.id == task.device.id">{{item.name ??
+                            item.type}}</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                <div>
+                    <span style="display: block;">{{ 'select.device-property' | translate }}</span>
+                    <select class="form-select">
+                        <option *ngFor="let item of deviceProperties" value="{{item.propertyName}}"
+                            (click)="onSelectProperty(item)"
+                            [selected]="item.propertyName == task.property.propertyName">
+                            {{item.propertyName}}</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                <div>
+                    <span style="display: block;">{{ 'select.event' | translate }}</span>
+                    <select class="form-select">
+                        <option *ngFor="let item of ableEvents" value="{{item}}" (click)="onselectEvent(item)"
+                            [selected]="item == task.eventName">{{item}}
+                        </option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                <div>
+                    <span style="display: block;">{{ 'label.value' | translate }}</span>
+                    <app-edit-property [property]="task.property" [editOriginal]="true"></app-edit-property>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                <div>
+                    <span style="display: block;">{{ 'input.interval' | translate }}</span>
+                    <input class="form-control" type="number" style="display: block;max-width: 500px;"
+                        inputmode="numeric" name="interval" [(ngModel)]="task.interval" />
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                <div>
+                    <span style="display: inline-block;">{{ 'input.enabled' | translate }}</span>
+                    <input type="checkbox" style="display: inline-block;margin-left: 10px;" name="isEnabled"
+                        [(ngModel)]="task.enabled" />
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+<app-save-changes-model [visible]="isEdit || hasChanges" [message]="'page.task.message.save-task' | translate" [disableYes]="!canBeSaved" (no)="onBack()"
+    (yes)="onSave()"></app-save-changes-model>

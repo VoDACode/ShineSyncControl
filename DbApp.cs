@@ -11,10 +11,10 @@ namespace ShineSyncControl
         public DbSet<Group> Groups { get; set; }
         public DbSet<Device> Devices { get; set; }
         public DbSet<DeviceProperty> DeviceProperties { get; set; }
+        public DbSet<DeviceGroup> DeviceGroups { get; set; }
         public DbSet<Expression> Expressions { get; set; }
-        public DbSet<Models.DB.ActionModel> Actions { get; set; }
-        public DbSet<Models.DB.TaskModel> Tasks { get; set; }
-        public DbSet<ScheduledTask> ScheduledTasks { get; set; }
+        public DbSet<ActionModel> Actions { get; set; }
+        public DbSet<TaskModel> Tasks { get; set; }
         public DbSet<ActionTask> ActionTask { get; set; }
         public DbSet<UserDevice> UserDevices { get; set; }
         public DbSet<UserGroup> UserGroups { get; set; }
@@ -39,12 +39,43 @@ namespace ShineSyncControl
                 .HasIndex(x => x.Email)
                 .IsUnique();
 
+            modelBuilder.Entity<User>()
+                .HasMany(p => p.Expressions)
+                .WithOne(p => p.User)
+                .HasForeignKey(p => p.UserId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<User>()
+                .HasMany(p => p.Actions)
+                .WithOne(p => p.User)
+                .HasForeignKey(p => p.UserId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<User>()
+                .HasMany(p => p.Tasks)
+                .WithOne(p => p.User)
+                .HasForeignKey(p => p.UserId)
+                .OnDelete(DeleteBehavior.NoAction);
+
             modelBuilder.Entity<Device>()
                .HasKey(x => x.Id);
 
             modelBuilder.Entity<Device>()
                .HasIndex(x => x.Token)
                .IsUnique();
+
+            modelBuilder.Entity<DeviceGroup>()
+               .HasKey(x => x.Id);
+
+            modelBuilder.Entity<DeviceGroup>()
+                .HasOne(dg => dg.Owner)
+                .WithMany()
+                .HasForeignKey(dg => dg.OwnerId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<DeviceGroup>()
+                .HasMany(dg => dg.Devices)
+                .WithMany(dg => dg.Groups);
 
             modelBuilder.Entity<Expression>()
                 .HasOne(e => e.Device)
@@ -55,63 +86,54 @@ namespace ShineSyncControl
             modelBuilder.Entity<Expression>()
                 .HasOne(e => e.DeviceProperty)
                 .WithMany()
-                .HasForeignKey(e => new
-                {
-                    e.DevicePropertyName,
-                    e.DeviceId
-                })
+                .HasForeignKey(e => e.DevicePropertyId)
                 .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<DeviceProperty>()
-               .HasKey(x => new { x.DeviceId, x.Name });
+               .HasKey(x => x.Id);
+            modelBuilder.Entity<DeviceProperty>()
+                .HasIndex(x => new
+                {
+                     x.Name,
+                     x.DeviceId
+                })
+                .IsUnique();
 
-            modelBuilder.Entity<Models.DB.ActionModel>()
-                .HasOne(a => a.Owner)
+            modelBuilder.Entity<ActionModel>()
+                .HasOne(a => a.User)
                 .WithMany()
-                .HasForeignKey(a => a.OwnerId)
+                .HasForeignKey(a => a.UserId)
                 .OnDelete(DeleteBehavior.NoAction);
 
-            modelBuilder.Entity<Models.DB.TaskModel>()
+            modelBuilder.Entity<TaskModel>()
                 .HasOne(t => t.Device)
                 .WithMany()
                 .HasForeignKey(t => t.DeviceId)
                 .OnDelete(DeleteBehavior.NoAction);
 
-            modelBuilder.Entity<Models.DB.TaskModel>()
+            modelBuilder.Entity<TaskModel>()
                 .HasOne(t => t.DeviceProperty)
                 .WithMany()
-                .HasForeignKey(t => new
-                {
-                    t.DevicePropertyName, t.DeviceId
-                })
+                .HasForeignKey(t => t.DevicePropertyId)
                 .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<ActionTask>()
-                .HasKey(x =>
-                new
-                {
-                    x.ActionId,
-                    x.WhenTrueTaskId,
-                    x.WhenFalseTaskId
-                });
-            modelBuilder.Entity<ActionTask>()
-                .HasOne(at => at.Action)                   // ActionTask has one Action
-                .WithMany(a => a.ActionTasks)              // Action has many ActionTasks
-                .HasForeignKey(at => at.ActionId)          // Foreign key in ActionTask
+                .HasOne(at => at.Action)
+                .WithMany(a => a.ActionTasks)
+                .HasForeignKey(at => at.ActionId)
                 .IsRequired();
 
             modelBuilder.Entity<ActionTask>()
-                .HasOne(at => at.WhenTrueTask)             // ActionTask has one WhenTrueTask (Task)
-                .WithMany()                               // No navigation property on Task side
-                .HasForeignKey(at => at.WhenTrueTaskId)    // Foreign key in ActionTask
+                .HasOne(at => at.WhenTrueTask)
+                .WithMany()
+                .HasForeignKey(at => at.WhenTrueTaskId)
                 .IsRequired()
                 .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<ActionTask>()
-                .HasOne(at => at.WhenFalseTask)            // ActionTask has one WhenFalseTask (Task)
-                .WithMany()                               // No navigation property on Task side
-                .HasForeignKey(at => at.WhenFalseTaskId)   // Foreign key in ActionTask
-                .IsRequired()
+                .HasOne(at => at.WhenFalseTask)
+                .WithMany()
+                .HasForeignKey(at => at.WhenFalseTaskId)
                 .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<UserDevice>()

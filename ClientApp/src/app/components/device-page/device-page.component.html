@@ -8,11 +8,11 @@
                 <div class="col">
                     <div class="row">
                         <div class="col d-flex align-items-center justify-content-start">
-                            <span *ngIf="!editMode">{{device.name ?? '"Empty"'}}</span>
+                            <span *ngIf="!editMode">{{device.name ?? 'label.empty' | translate}}</span>
                             <input *ngIf="editMode" type="text" class="form-control" [(ngModel)]="editedDevice.name">
                         </div>
                         <div class="col d-flex align-items-center justify-content-end edit-mode-box">
-                            <span>Edit mode</span>
+                            <span>{{ 'label.edit-mode' | translate }}</span>
                             <app-switch [status]="editMode" (switch)="onEditClick($event)"></app-switch>
                         </div>
                     </div>
@@ -31,8 +31,8 @@
             </div>
             <div class="row">
                 <div class="col">
-                    <span *ngIf="!editMode">{{device.description ?? '"Empty"'}}</span>
-                    <input *ngIf="editMode" class="form-control" [(ngModel)]="editedDevice.description"/>
+                    <span *ngIf="!editMode">{{device.description ?? 'label.empty' | translate}}</span>
+                    <input *ngIf="editMode" class="form-control" [(ngModel)]="editedDevice.description" />
                 </div>
             </div>
         </div>
@@ -47,13 +47,16 @@
             <div>
                 <ul class="nav nav-tabs" role="tablist">
                     <li class="nav-item" role="presentation">
-                        <a class="nav-link active" role="tab" data-bs-toggle="tab" href="#tab-1">Properties</a>
+                        <a class="nav-link active" role="tab" data-bs-toggle="tab" href="#tab-1">{{
+                            'page.device.navigation.properties' | translate }}</a>
                     </li>
                     <li class="nav-item" role="presentation">
-                        <a class="nav-link" role="tab" data-bs-toggle="tab" href="#tab-2">Actions</a>
+                        <a class="nav-link" role="tab" data-bs-toggle="tab" href="#tab-2">{{
+                            'page.device.navigation.actions' | translate }}</a>
                     </li>
                     <li class="nav-item" role="presentation">
-                        <a class="nav-link" role="tab" data-bs-toggle="tab" href="#tab-3">Scheduled tasks</a>
+                        <a class="nav-link" role="tab" data-bs-toggle="tab" href="#tab-3">{{
+                            'page.device.navigation.tasks' | translate }}</a>
                     </li>
                 </ul>
                 <div class="tab-content">
@@ -64,19 +67,16 @@
                                     <table class="table table-striped-columns">
                                         <thead>
                                             <tr>
-                                                <th style="width: 200px;">Name</th>
-                                                <th>Value</th>
+                                                <th style="width: 200px;">{{ 'input.name' | translate }}</th>
+                                                <th>{{ 'label.value' | translate }}</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             <tr *ngFor="let property of deviceProperties">
                                                 <td>{{property.propertyName}}</td>
                                                 <td>
-                                                    <input type="text" class="form-control" (change)="onSetProperty(property)" [disabled]="property.isReadOnly" [(ngModel)]="property.value" *ngIf="property.type == 1">
-                                                    <input type="number" class="form-control" (change)="onSetProperty(property)" [disabled]="property.isReadOnly" [(ngModel)]="property.value" *ngIf="property.type == 2">
-                                                    <app-switch [disabled]="property.isReadOnly" (switch)="onSetProperty(property, $event)" [status]="property.value == '1'" *ngIf="property.type == 3"/>
-                                                    <input type="datetime-local" class="form-control" (change)="onSetProperty(property)" [disabled]="property.isReadOnly" [(ngModel)]="property.value" *ngIf="property.type == 4">
-                                                    <input type="date" class="form-control" (change)="onSetProperty(property)" [disabled]="property.isReadOnly" [(ngModel)]="property.value" *ngIf="property.type == 5">
+                                                    <app-edit-property [editOriginal]="false" [property]="property"
+                                                        (changed)="onSetProperty($event)"></app-edit-property>
                                                 </td>
                                             </tr>
                                         </tbody>
@@ -86,7 +86,8 @@
                         </div>
                     </div>
                     <div class="tab-pane" role="tabpanel" id="tab-2">
-                        <button class="btn btn-primary" type="button">Add new</button>
+                        <button class="btn btn-primary" type="button"
+                            [routerLink]="['/action/new', {target: device.id}]">{{ 'page.device.action.button.add-new' | translate }}</button>
                         <ul>
                             <li *ngFor="let action of deviceActions">
                                 <a [routerLink]="['/action', action.id]">{{action.name}}</a>
@@ -94,12 +95,11 @@
                         </ul>
                     </div>
                     <div class="tab-pane" role="tabpanel" id="tab-3">
-                        <button class="btn btn-primary" type="button">Add new</button>
+                        <button class="btn btn-primary" type="button">{{ 'page.device.task.button.add-new' | translate }}</button>
                         <ul>
-                            <li>Item 1</li>
-                            <li>Item 2</li>
-                            <li>Item 3</li>
-                            <li>Item 4</li>
+                            <li *ngFor="let task of deviceTasks">
+                                <a [routerLink]="['/task', task.id]">{{task.name}}</a>
+                            </li>
                         </ul>
                     </div>
                 </div>
@@ -107,17 +107,6 @@
         </div>
     </div>
 </div>
-
-<div [hidden]="!editMode" class="text-center justify-content-xxl-center align-items-xxl-center modal-window">
-    <div>
-        <div class="row">
-            <div class="col message">
-                <span>Save changes?</span>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col"><button class="btn btn-success" type="button" (click)="onSaveClick()">Save</button></div>
-            <div class="col"><button class="btn btn-danger" type="button" [disabled]="!hasChanges" (click)="onCancelClick()">Cancel</button></div>
-        </div>
-    </div>
-</div>
+<app-save-changes-model [visible]="editMode" [message]="'Save changes?'" [yesText]="'Save'" [noText]="'Cancel'"
+    [disableYes]="!hasChanges" (yes)="onSaveClick()" (no)="onCancelClick()">
+</app-save-changes-model>

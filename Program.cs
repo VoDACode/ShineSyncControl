@@ -2,6 +2,8 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using ShineSyncControl;
+using ShineSyncControl.Models.ConfigOptions;
+using ShineSyncControl.Services.DataBus;
 using ShineSyncControl.Services.DeviceCommand;
 using ShineSyncControl.Services.Email;
 using ShineSyncControl.Services.TaskEventWorker;
@@ -9,6 +11,14 @@ using System.Text;
 using VoDA.WebSockets;
 
 var builder = WebApplication.CreateBuilder(args);
+
+if (!builder.Environment.IsDevelopment())
+{
+    builder.WebHost.UseUrls("https://0.0.0.0:7070");
+}
+
+builder.Services.Configure<DeviceOption>(
+    builder.Configuration.GetSection("Device"));
 
 builder.Services.AddControllersWithViews();
 
@@ -83,6 +93,8 @@ builder.Services.AddCors(options =>
 builder.Services.AddTaskEventWorker();
 
 builder.Services.AddDeviceCommand();
+
+builder.Services.AddDataBus();
 
 var app = builder.Build();
 

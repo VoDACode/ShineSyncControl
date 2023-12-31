@@ -1,0 +1,10 @@
+<div class="container">
+    <section *ngFor="let action of actions;let i = index">
+        <div class="row">
+            <div class="col-xxl-1 text-center"><span><strong>#{{i + 1}}</strong></span></div>
+            <div class="col-xxl-3"><a [routerLink]="['/action', action.id]">{{action.name}}</a></div>
+            <div class="col"><span>{{action.description}}</span></div>
+        </div>
+        <hr />
+    </section>
+</div>

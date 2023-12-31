@@ -6,6 +6,9 @@ namespace ShineSyncControl.Models.DB
 {
     public class DeviceProperty : IDynamicValue
     {
+        [Key]
+        [MaxLength(128)]
+        public string Id { get; set; }
         [Required]
         [MaxLength(64)]
         public string DeviceId { get; set; }
@@ -68,6 +71,51 @@ namespace ShineSyncControl.Models.DB
                     return false;
                 default:
                     this.Value = "";
+                    return false;
+            }
+        }
+
+        public static bool TryParse(string val, PropertyType type, out object? result)
+        {
+            switch (type)
+            {
+                case PropertyType.String:
+                    result = val;
+                    return true;
+                case PropertyType.Number:
+                    if (double.TryParse(val, out var num))
+                    {
+                        result = num;
+                        return true;
+                    }
+                    result = null;
+                    return false;
+                case PropertyType.Boolean:
+                    if (val == "0" || val == "1")
+                    {
+                        result = val == "1";
+                        return true;
+                    }
+                    result = null;
+                    return false;
+                case PropertyType.DateTime:
+                    if (DateTime.TryParse(val, out var dateTime))
+                    {
+                        result = dateTime;
+                        return true;
+                    }
+                    result = null;
+                    return false;
+                case PropertyType.TimeOnly:
+                    if (TimeOnly.TryParse(val, out var timeOnly))
+                    {
+                        result = timeOnly;
+                        return true;
+                    }
+                    result = null;
+                    return false;
+                default:
+                    result = null;
                     return false;
             }
         }

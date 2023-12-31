@@ -23,6 +23,7 @@ export class LoginComponent {
     this.authApiService.login(this.email, this.password).subscribe(res => {
       console.log(res);
       if (res.success) {
+        localStorage.setItem('isLoggedin', 'true');
         this.router.navigate(['/home']);
       } else {
         alert(res.message);

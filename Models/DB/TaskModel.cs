@@ -16,8 +16,12 @@ namespace ShineSyncControl.Models.DB
         public string DeviceId { get; set; }
         public Device Device { get; set; }
         [Required]
-        public string DevicePropertyName { get; set; }
+        public string DevicePropertyId { get; set; }
         public DeviceProperty DeviceProperty { get; set; }
+
+        [Required]
+        public int UserId { get; set; }
+        public User User { get; set; }
 
         [Required]
         [MaxLength(50)]
@@ -28,7 +32,9 @@ namespace ShineSyncControl.Models.DB
         public PropertyType Type { get; set; }
         public string? Description { get; set; }
 
-        public ICollection<ScheduledTask> ScheduledTasks { get; set; } = new List<ScheduledTask>();
+        public long? Interval { get; set; }
+        public bool Enabled { get; set; }
+
         public ICollection<ActionTask> ActionTasks { get; set; } = new List<ActionTask>();
     }
 }

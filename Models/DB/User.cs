@@ -19,7 +19,7 @@ namespace ShineSyncControl.Models.DB
         [EmailAddress]
         public string Email { get; set; }
         public bool IsActivated { get; set; } = false;
-        public string? ActivationCode { get; set; }
+        public bool IsBlocked { get; set; } = false;
 
         public string Role { get; set; }
         public UserRoles RoleEntity { get; set; }
@@ -29,5 +29,7 @@ namespace ShineSyncControl.Models.DB
         public ICollection<UserGroup> Groups { get; set; } = new List<UserGroup>();
         public ICollection<Device> Devices { get; set; } = new List<Device>();
         public ICollection<UserDevice> UserDevices { get; set; } = new List<UserDevice>();
+        public ICollection<Expression> Expressions { get; set; } = new List<Expression>();
+        public ICollection<TaskModel> Tasks { get; set; } = new List<TaskModel>();
     }
 }

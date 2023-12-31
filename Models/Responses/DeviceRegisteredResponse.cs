@@ -19,7 +19,7 @@ namespace ShineSyncControl.Models.Responses
         {
             public string Id { get; set; }
             public string Token { get; set; }
-            public string? Type { get; set; } = null;
+            public string Type { get; set; }
             public DateTime RegisteredAt { get; set; }
         }
     }

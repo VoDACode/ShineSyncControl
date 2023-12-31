@@ -5,6 +5,7 @@
 export const environment = {
   production: false,
   webSocketUrl: 'wss://localhost:7233',
+  //  webSocketUrl: 'wss://shinesynccontrol.vodacode.space',
 };
 
 /*

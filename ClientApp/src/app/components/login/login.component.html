@@ -2,7 +2,7 @@
     <div class="container">
         <div class="row mb-5">
             <div class="col-md-8 col-xl-6 text-center mx-auto">
-                <h2 i18n>Log In</h2>
+                <h2 i18n>{{ 'page.log-in.title' | translate }}</h2>
             </div>
         </div>
         <div class="row d-flex justify-content-center">
@@ -11,17 +11,17 @@
                     <div class="card-body d-flex flex-column align-items-center">
                         <form class="text-center" method="post">
                             <div class="mb-3">
-                                <input i18n-placeholder class="form-control" type="email" name="email" placeholder="Email"
+                                <input i18n-placeholder class="form-control" type="email" name="email" placeholder="{{ 'input.email' | translate }}"
                                     [(ngModel)]="email">
                             </div>
                             <div class="mb-3">
-                                <input i18n-placeholder class="form-control" type="password" name="password" placeholder="Password"
+                                <input i18n-placeholder class="form-control" type="password" name="password" placeholder="{{ 'input.password' | translate }}"
                                     [(ngModel)]="password">
                             </div>
                             <div class="mb-3">
-                                <button i18n class="btn btn-primary d-block w-100" type="submit" (click)="login()">Log In</button>
+                                <button i18n class="btn btn-primary d-block w-100" type="submit" (click)="login()">{{ 'page.log-in.title' | translate }}</button>
                             </div>
-                            <p class="text-muted" i18n>Forgot your password?</p>
+                            <p class="text-muted" i18n>{{ 'page.log-in.forgot-your-password' | translate }}</p>
                         </form>
                     </div>
                 </div>

@@ -1,0 +1,40 @@
+<div class="container" style="max-width: 512px;">
+    <form>
+        <div class="row">
+            <div class="col">
+                <h1 style="text-align: center;">{{ 'page.add-device.title' | translate }}</h1>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                <div>
+                    <span style="display: block;">
+                        {{ 'page.add-device.enter-device-id.title' | translate }}
+                    </span>
+                    <input class="form-control" type="text" name="device-id" style="display: block;" [(ngModel)]="deviceId" />
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col align-self-center" style="text-align: center;margin-top: 5px;">
+                <button class="btn btn-primary" type="button" (click)="connectDevice()" [disabled]="!canBeConnected">{{ 'button.add' | translate }}</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<div class="loading" *ngIf="showLoading">
+    <div class="content">
+        <div class="row">
+            <div class="col">
+                <img src="assets/img/spinner-of-dots.png" class="icon dark-mode"/>
+                <span>{{waitingText}}</span>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col" style="text-align: center;">
+                <button class="btn btn-primary" type="button" (click)="cancelAction()">{{ 'button.cancel' | translate }}</button>
+            </div>
+        </div>
+    </div>
+</div>

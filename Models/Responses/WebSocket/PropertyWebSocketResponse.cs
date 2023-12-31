@@ -5,6 +5,7 @@ namespace ShineSyncControl.Models.Responses.WebSocket
 {
     public class PropertyWebSocketResponse
     {
+        public string Id { get; set; }
         public string Name { get; set; }
         public string Value { get; set; }
         public PropertyType Type { get; set; }
@@ -12,9 +13,11 @@ namespace ShineSyncControl.Models.Responses.WebSocket
 
         public PropertyWebSocketResponse(DeviceProperty property)
         {
+            Id = property.Id;
             Name = property.Name;
             Value = property.Value;
             Type = property.Type;
         }
+        public PropertyWebSocketResponse() { }
     }
 }

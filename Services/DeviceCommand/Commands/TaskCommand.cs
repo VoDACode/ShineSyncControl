@@ -5,9 +5,9 @@ using System.Text.RegularExpressions;
 
 namespace ShineSyncControl.Services.DeviceCommand.Commands
 {
-    public class ScheduledTasksCommand : BaseCommand
+    public class TaskCommand : BaseCommand
     {
-        public override Regex Pattern => new Regex("^schedule (?<arg1>list|help)$");
+        public override Regex Pattern => new Regex("^task (?<arg1>list|help)$");
 
         public override bool HandleCommand(DeviceCommandContext context)
         {
@@ -24,12 +24,11 @@ namespace ShineSyncControl.Services.DeviceCommand.Commands
 
             if (arg1 == "list")
             {
-                var tasks = db.ScheduledTasks
-                    .Include(x => x.Task)
-                    .Where(x => x.Task.DeviceId == device.Id)
+                var tasks = db.Tasks
+                    .Where(x => x.DeviceId == device.Id && x.Interval != null)
                     .ToList();
 
-                context.Response(new CommandScheduledTasksResponse(tasks));
+                context.Response(new CommandTaskResponse(tasks));
                 return true;
             }
 

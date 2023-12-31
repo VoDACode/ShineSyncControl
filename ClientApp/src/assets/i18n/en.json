@@ -1,0 +1,152 @@
+{
+  "navbar": {
+    "navigation": {
+      "actions": {
+        "title": "Actions"
+      },
+      "devices": {
+        "title": "Devices"
+      },
+      "login": {
+        "title": "Log In"
+      },
+      "register": {
+        "title": "Register"
+      },
+      "add-device": {
+        "title": "Add Device"
+      },
+      "register-new-device": {
+        "title": "Register new device"
+      },
+      "device-groups": {
+        "title": "Device groups"
+      }
+    },
+    "toggle-navigation": "Toggle navigation"
+  },
+  "theme": {
+    "switch": {
+      "auto": {
+        "title": "Auto"
+      },
+      "dark": {
+        "title": "Dark"
+      },
+      "light": "Light"
+    }
+  },
+  "page": {
+    "device": {
+      "navigation": {
+        "properties": "Properties",
+        "actions": "Actions",
+        "tasks": "Tasks"
+      },
+      "action": {
+        "button": {
+          "add-new": "Add new"
+        }
+      },
+      "task": {
+        "button": {
+          "add-new": "Add new"
+        }
+      }
+    },
+    "add-device": {
+      "title": "Add the device",
+      "enter-device-id": {
+        "title": "Enter the device ID"
+      },
+      "waiting-for-device-activation": "Waiting for device activation ({{minutes}}:{{seconds}})..."
+    },
+    "action": {
+      "task": {
+        "title": "Task",
+        "when-true": {
+          "title": "When true"
+        },
+        "when-false": {
+          "title": "When false"
+        },
+        "button": {
+          "create-new-task": "Create new task"
+        }
+      },
+      "expression": {
+        "title": "Expression",
+        "button": {
+          "add-new": "Add new"
+        }
+      }
+    },
+    "device-groups": {
+      "button": {
+        "add-device": "Add device",
+        "add-device-group": "Add device group"
+      }
+    },
+    "device-register": {
+      "title": "Register new device",
+      "properties": {
+        "title": "Properties"
+      },
+      "button": {
+        "register": "Register"
+      }
+    },
+    "log-in": {
+      "title": "Log In",
+      "forgot-your-password": "Forgot your password?"
+    },
+    "register": {
+      "title": "Register"
+    },
+    "task": {
+      "message": {
+        "save-task": "Save task?"
+      }
+    }
+  },
+  "input": {
+    "name": "Name",
+    "description": "Description",
+    "email": "Email",
+    "password": "Password",
+    "first-name": "First Name",
+    "last-name": "Last Name",
+    "interval": "Interval",
+    "enabled": "Enabled"
+  },
+  "button": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "add": "Add",
+    "edit": "Edit",
+    "close": "Close",
+    "create": "Create",
+    "yes": "Yes",
+    "no": "No"
+  },
+  "label": {
+    "edit-mode": "Edit mode",
+    "empty": "Empty",
+    "value": "Value"
+  },
+  "select": {
+    "device-type": "Select device type",
+    "device": "Device",
+    "device-property": "Device property",
+    "event": "Event"
+  },
+  "expression": {
+    "select": {
+      "expression-operator": {
+        "and": "And",
+        "or": "Or"
+      }
+    }
+  }
+}

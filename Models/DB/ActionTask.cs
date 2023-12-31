@@ -12,8 +12,7 @@ namespace ShineSyncControl.Models.DB
         [Required]
         public int WhenTrueTaskId { get; set; }
         public TaskModel WhenTrueTask { get; set; }
-        [Required]
-        public int WhenFalseTaskId { get; set; }
-        public TaskModel WhenFalseTask { get; set; }
+        public int? WhenFalseTaskId { get; set; } = null;
+        public TaskModel? WhenFalseTask { get; set; } = null;
     }
 }

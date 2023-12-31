@@ -53,7 +53,7 @@ namespace ShineSyncControl.Tools
                         Id = $"{Guid.NewGuid()}-{DateTime.UtcNow.Ticks}",
                         ActivatedAt = DateTime.UtcNow,
                         IsActive = true,
-                        OwnerId = 1,
+                        UserId = 1,
                         RegisteredAt = DateTime.UtcNow,
                         Type = record.Type
                     };
@@ -74,6 +74,7 @@ namespace ShineSyncControl.Tools
                     {
                         var property = new DeviceProperty()
                         {
+                            Id = $"{dbDevice.Id}-{prop.PropertyName}",
                             Device = dbDevice,
                             DeviceId = dbDevice.Id,
                             IsReadOnly = prop.IsReadOnly,

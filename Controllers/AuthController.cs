@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.IdentityModel.Tokens;
 using ShineSyncControl.Attributes;
 using ShineSyncControl.Models.DB;
@@ -11,6 +12,7 @@ using ShineSyncControl.Tools;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using System.Text.Json;
 
 namespace ShineSyncControl.Controllers
 {
@@ -20,11 +22,13 @@ namespace ShineSyncControl.Controllers
     {
         protected readonly IEmailService email;
         protected readonly IConfiguration _configuration;
+        protected readonly IDistributedCache cache;
 
-        public AuthController(DbApp db, IEmailService email, IConfiguration configuration) : base(db)
+        public AuthController(DbApp db, IEmailService email, IConfiguration configuration, IDistributedCache cache) : base(db)
         {
             this.email = email;
             _configuration = configuration;
+            this.cache = cache;
         }
 
         [HttpPost("register")]
@@ -36,22 +40,24 @@ namespace ShineSyncControl.Controllers
                 return BadRequest(new BaseResponse.ErrorResponse("User already exists"));
             }
             string passwordHash = PasswordHasher.Hash(request.Password);
+            string activationCode = Guid.NewGuid().ToString();
             user = new User
             {
                 FirstName = request.FirstName,
                 LastName = request.LastName,
                 Email = request.Email,
                 Password = passwordHash,
-                ActivationCode = Guid.NewGuid().ToString(),
                 IsActivated = false
             };
-            await DB.Users.AddAsync(user);
-            await DB.SaveChangesAsync();
+            await cache.SetStringAsync($"user.activation-code.{activationCode}", JsonSerializer.Serialize(user), new DistributedCacheEntryOptions
+            {
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(6)
+            });
 
             await email.SendEmailUseTemplateAsync(user.Email, "ActivateAccount.html", new Dictionary<string, string>
             {
                 {"firstName", user.FirstName },
-                {"link", $"https://{HttpContext.Request.Host}/api/confirm/email/{user.ActivationCode}?e={Uri.UnescapeDataString(user.Email)}" }
+                {"link", $"https://{HttpContext.Request.Host}/api/confirm/email/{activationCode}?e={Uri.UnescapeDataString(user.Email)}" }
             });
 
             return Ok(new BaseResponse.SuccessResponse());

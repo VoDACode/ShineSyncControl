@@ -14,8 +14,6 @@ namespace ShineSyncControl.Models.Requests
         [Required]
         [MaxLength(255)]
         public string Value { get; set; }
-        [Required]
-        public PropertyType Type { get; set; }
 
         public ExpressionPostRequest? SubExpression { get; set; }
         public LogicalOperator? ExpressionOperator { get; set; }

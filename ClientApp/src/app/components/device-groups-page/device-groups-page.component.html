@@ -1,0 +1,76 @@
+<section *ngIf="!this.isNewGroup && !this.isRoot">
+    <h1 class="text-center">{{currentGroup.name}}</h1>
+    <div class="col d-flex align-items-center justify-content-end edit-mode-box">
+        <span>{{ 'label.edit-mode' | translate }}</span>
+        <app-switch [status]="editMode" (switch)="onEditClick($event)"></app-switch>
+    </div>
+    <div class="justify-content-center flex-wrap" style="position: relative;display: flex;" *ngIf="isViewMode">
+        <app-device-item *ngFor="let device of currentGroup?.devices" [device]="device"></app-device-item>
+    </div>
+</section>
+
+<section *ngIf="isNewGroup || isEditMode">
+    <div class="container">
+        <div class="row">
+            <div class="col">
+                <div style="margin-top: 10px;">
+                    <span>{{ 'input.name' | translate }}</span>
+                    <input type="text" class="form-control" name="name" [(ngModel)]="currentGroup.name" />
+                </div>
+                <div style="margin-top: 10px;">
+                    <span>{{ 'input.description' | translate }}</span>
+                    <input type="text" class="form-control" name="description" [(ngModel)]="currentGroup.description" />
+                </div>
+                <div style="margin-top: 10px;text-align: center;">
+                    <button class="btn btn-primary" type="button" (click)="saveGroup()">{{ 'button.save' | translate }}</button>
+                </div>
+            </div>
+        </div>
+        <hr />
+        <div class="row">
+            <div class="col">
+                <div class="row" style="margin-top: 10px;" *ngFor="let device of currentGroup.devices; let i = index">
+                    <div class="col-xxl-1 text-center">
+                        <span><strong>#{{i + 1}}</strong></span>
+                    </div>
+                    <div class="col">
+                        <select class="form-control" name="deviceName">
+                            <option *ngFor="let item of devices" [value]="item.name" [selected]="item.id == device.id"
+                                (click)="onSelectDevice(item, i)">{{item.name ?? item.type}}
+                            </option>
+                        </select>
+                    </div>
+                    <div class="col-xxl-1 text-center delete-box">
+                        <i class="icon ion-close-round" (click)="removeDeviceFromGroup(device)"></i>
+                    </div>
+                </div>
+            </div>
+            <div style="margin-top: 10px; text-align: center;">
+                <button class="btn btn-primary" type="button" (click)="addNewDeviceToGroup()"
+                    [disabled]="!canAddNewDevice">{{ 'page.device-groups.button.add-device' | translate }}</button>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section *ngIf="isRoot">
+    <div class="container">
+        <div class="row">
+            <button class="btn btn-primary" [routerLink]="['/device/groups/new']">{{ 'page.device-groups.button.add-device-group' | translate }}</button>
+        </div>
+        <div class="row">
+            <div class="col-xxl-1 text-center"><span><strong>#</strong></span></div>
+            <div class="col-xxl-3"><span><strong>{{ 'input.name' | translate }}</strong></span></div>
+            <div class="col"><span><strong>{{ 'input.description' | translate }}</strong></span></div>
+        </div>
+        <hr />
+        <div *ngFor="let group of deviceGroups; let i = index">
+            <div class="row">
+                <div class="col-xxl-1 text-center"><span><strong>#{{i + 1}}</strong></span></div>
+                <div class="col-xxl-3"><a [routerLink]="['/device/groups', group.id]">{{group.name}}</a></div>
+                <div class="col"><span>{{group.description}}</span></div>
+            </div>
+            <hr />
+        </div>
+    </div>
+</section>

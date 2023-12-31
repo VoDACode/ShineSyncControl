@@ -6,7 +6,7 @@ namespace ShineSyncControl.Utilities
 {
     public static class ValueComparer
     {
-        public static bool CompareValue(this IDynamicValue a, IDynamicValue b, ComparisonOperator @operator)
+        public static bool CompareValue(this IDynamicValue b, IDynamicValue a, ComparisonOperator @operator)
         {
             switch (@operator)
             {

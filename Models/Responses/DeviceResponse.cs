@@ -29,7 +29,7 @@ namespace ShineSyncControl.Models.Responses
             public View(Device device)
             {
                 Id = device.Id;
-                OwnerId = device.OwnerId;
+                OwnerId = device.UserId;
                 Name = device.Name;
                 Type = device.Type;
                 Description = device.Description;
