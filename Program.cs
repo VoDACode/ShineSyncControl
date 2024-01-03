@@ -5,6 +5,7 @@ using ShineSyncControl;
 using ShineSyncControl.Models.ConfigOptions;
 using ShineSyncControl.Services.DataBus;
 using ShineSyncControl.Services.DeviceCommand;
+using ShineSyncControl.Services.DeviceManager;
 using ShineSyncControl.Services.Email;
 using ShineSyncControl.Services.TaskEventWorker;
 using System.Text;
@@ -92,7 +93,7 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddTaskEventWorker();
 
-builder.Services.AddDeviceCommand();
+builder.Services.AddDeviceManager();
 
 builder.Services.AddDataBus();
 

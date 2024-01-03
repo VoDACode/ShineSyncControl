@@ -1,14 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Caching.Distributed;
 using ShineSyncControl.Attributes;
 using ShineSyncControl.Models.DB;
-using ShineSyncControl.Models.Responses.WebSocket;
 using ShineSyncControl.Services.DataBus;
 using ShineSyncControl.Services.DataBus.Models;
-using ShineSyncControl.Services.DeviceCommand;
+using ShineSyncControl.Services.DeviceManager;
 using System.Security.Claims;
-using System.Text.Json;
 using VoDA.WebSockets;
 
 namespace ShineSyncControl.Controllers
@@ -17,11 +14,8 @@ namespace ShineSyncControl.Controllers
     public class DeviceWebSocket : BaseWebSocketController
     {
         protected readonly DbApp db;
-        protected readonly IDeviceCommandService deviceCommandService;
-        protected readonly IDistributedCache cache;
         protected readonly IDataBus dataBus;
-
-        private DateTime lastPing = DateTime.UtcNow;
+        protected readonly IDeviceManager deviceManager;
 
         protected int AuthorizedUserId
         {
@@ -44,48 +38,37 @@ namespace ShineSyncControl.Controllers
             }
         }
 
-        public DeviceWebSocket(DbApp db, IDeviceCommandService deviceCommandService, IDistributedCache cache, IDataBus dataBus)
+        public DeviceWebSocket(DbApp db, IDataBus dataBus, IDeviceManager deviceManager)
         {
             this.db = db;
-            this.deviceCommandService = deviceCommandService;
-            this.cache = cache;
             this.dataBus = dataBus;
+            this.deviceManager = deviceManager;
         }
 
         [AuthorizeAnyType(Type = Enums.AuthorizeType.Device)]
-        [WebSocketCyclic]
-        [WebSocketPath("command")]
-        public async void Command(string message)
+        [WebSocketPath("connect")]
+        public async Task Connect()
         {
-            if(string.IsNullOrEmpty(message))
+            var device = HttpContext.Items["Device"] as Device;
+            if (device is null)
             {
                 return;
             }
+            device = db.Devices.Include(x => x.Properties).Single(p => p.Id == device.Id);
 
-            if (message == "ping")
+            DeviceContext context = new DeviceContext(device, Client, HttpContext);
+            if (deviceManager.Register(context))
             {
-                var timeNow = DateTime.UtcNow;
-                await cache.SetStringAsync($"device_{Client.Id}_online",
-                    timeNow.ToString(),
-                    new DistributedCacheEntryOptions()
-                    {
-                        AbsoluteExpiration = DateTime.UtcNow.AddMinutes(1)
-                    });
-                var device = HttpContext.Items["Device"] as Device;
-                if (device is not null)
-                {
-                    device.LastOnline = timeNow;
-                    db.Devices.Update(device);
-                    await db.SaveChangesAsync();
-                }
-                return;
-            }
-
-            deviceCommandService.HandleCommand(new DeviceCommandContext(message, HttpContext, Client));
-            if ((DateTime.UtcNow - lastPing).TotalSeconds > 30)
-            {
-                lastPing = DateTime.UtcNow;
-                await Client.SendAsync("ping");
+                device.LastOnline = DateTime.UtcNow;
+                await db.SaveChangesAsync();
+                await context.Send("Hello!");
+                dataBus.Subscribe($"device:{device.Id}", context.SendDataBusData);
+                deviceManager.WaitForDisconnect(device.Id);
+                deviceManager.Unregister(context);
+                dataBus.Unsubscribe($"device:{device.Id}", context.SendDataBusData);
+                await context.Send("Bye!");
+                device.LastOnline = DateTime.UtcNow;
+                await db.SaveChangesAsync();
             }
         }
 
@@ -98,35 +81,14 @@ namespace ShineSyncControl.Controllers
             {
                 return;
             }
-            // DeviceWebSocketResponse response = new DeviceWebSocketResponse(device);
             try
             {
-                dataBus.Subscribe($"device_{device.Id}", DeviceUpdateLiscener);
+                dataBus.Subscribe($"device:{device.Id}", DeviceUpdateLiscener);
                 while (!this.HttpContext.RequestAborted.IsCancellationRequested)
                 {
                     await Task.Delay(1000);
                 }
-                dataBus.Unsubscribe($"device_{device.Id}", DeviceUpdateLiscener);
-                //while (true)
-                //{
-                //    var lastOnlineString = await cache.GetStringAsync($"device_{id}_online");
-                //    response.LastOnline = (lastOnlineString is not null ? DateTime.Parse(lastOnlineString) : device.LastOnline) ?? DateTime.MinValue;
-
-                //    foreach (var property in response.Properties)
-                //    {
-                //        var value = await cache.GetStringAsync($"device_{property.Id}.value");
-                //        if (value is not null)
-                //        {
-                //            property.Value = value;
-                //        }
-                //    }
-
-                //    await Client.SendAsync(JsonSerializer.Serialize(response, new JsonSerializerOptions()
-                //    {
-                //        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-                //    }));
-                //    await Task.Delay(5_000);
-                //}
+                dataBus.Unsubscribe($"device:{device.Id}", DeviceUpdateLiscener);
             }
             catch
             {

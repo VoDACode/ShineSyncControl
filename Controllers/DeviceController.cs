@@ -218,8 +218,8 @@ namespace ShineSyncControl.Controllers
                 .Include(p => p.Properties)
                 .SingleAsync(p => p.Id == deviceId);
 
-            await cache.SetStringAsync($"device_{property.Id}.value", request.Value);
-            this.dataBus.Publish($"device_{device.Id}", JsonSerializer.Serialize(new DeviceWebSocketResponse(device), new JsonSerializerOptions()
+            await cache.SetStringAsync($"device:{property.Id}.value", request.Value);
+            this.dataBus.Publish($"device:{device.Id}", JsonSerializer.Serialize(new DeviceWebSocketResponse(device), new JsonSerializerOptions()
             {
                 PropertyNamingPolicy = JsonNamingPolicy.CamelCase
             }));
