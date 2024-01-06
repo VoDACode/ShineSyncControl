@@ -47,7 +47,8 @@ namespace ShineSyncControl.Controllers
                 LastName = request.LastName,
                 Email = request.Email,
                 Password = passwordHash,
-                IsActivated = false
+                IsActivated = false,
+                Role = await DB.Roles.Where(p => p.Role == UserRoles.User).SingleAsync(),
             };
             await cache.SetStringAsync($"user.activation-code.{activationCode}", JsonSerializer.Serialize(user), new DistributedCacheEntryOptions
             {
@@ -110,9 +111,9 @@ namespace ShineSyncControl.Controllers
         }
 
         [HttpGet("logout")]
-        public async Task<IActionResult> Logout()
+        public IActionResult Logout()
         {
-            await HttpContext.SignOutAsync();
+            HttpContext.Response.Cookies.Delete(".VoDACode.Authorize");
             return Ok(new BaseResponse.SuccessResponse());
         }
 

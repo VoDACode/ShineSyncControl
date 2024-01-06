@@ -24,7 +24,7 @@ namespace ShineSyncControl.Controllers
 
                 if(user is null)
                 {
-                    HttpContext.SignOutAsync().Wait();
+                    HttpContext.Response.Cookies.Delete(".VoDACode.Authorize");
                     Response.StatusCode = 401;
                     Response.WriteAsync("Unauthorized").Wait();
                     throw new InvalidOperationException("This property accessible only for authorized users.");
