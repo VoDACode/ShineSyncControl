@@ -11,12 +11,16 @@ namespace ShineSyncControl.Tools
         public static string Hash(string password)
         {
             byte[] salt;
-            new RNGCryptoServiceProvider().GetBytes(salt = new byte[SaltByteSize]);
+            var provider = new RNGCryptoServiceProvider();
+            provider.GetBytes(salt = new byte[SaltByteSize]);
+
             var pbkdf2 = new Rfc2898DeriveBytes(password, salt, HasingIterationsCount);
             byte[] hash = pbkdf2.GetBytes(HashByteSize);
             byte[] hashBytes = new byte[HashByteSize + SaltByteSize];
+
             Array.Copy(salt, 0, hashBytes, 0, SaltByteSize);
             Array.Copy(hash, 0, hashBytes, SaltByteSize, HashByteSize);
+
             return Convert.ToBase64String(hashBytes);
         }
 

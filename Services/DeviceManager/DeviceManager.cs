@@ -33,6 +33,7 @@ namespace ShineSyncControl.Services.DeviceManager
             }
             if (device.HttpContext.RequestAborted.IsCancellationRequested)
             {
+                Unregister(deviceId);
                 throw new Exception($"Device {deviceId} is disconnected");
             }
             await device.WebSocketClient.SendAsync(command);

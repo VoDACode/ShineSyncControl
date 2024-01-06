@@ -33,12 +33,12 @@ namespace ShineSyncControl.Controllers
             this.dataBus = dataBus;
         }
 
-        // in future, this will be replaced by a NTP server
+        // TO DO: in the future, this will be replaced by a NTP server
         [AuthorizeAnyType(Type = AuthorizeType.Device)]
         [HttpGet("time")]
         public IActionResult GetTime()
         {
-            return Ok(DateTime.UtcNow.Ticks);
+            return Ok(DateTime.UtcNow.Subtract(DateTime.UnixEpoch).TotalSeconds);
         }
 
         [AuthorizeAnyType(Roles = $"{UserRoles.Registrar},{UserRoles.Admin}", Type = AuthorizeType.User)]

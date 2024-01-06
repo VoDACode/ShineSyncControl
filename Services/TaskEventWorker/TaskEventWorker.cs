@@ -44,8 +44,8 @@ namespace ShineSyncControl.Services.TaskEventWorker
 
             foreach (var targetClass in targetClasses)
             {
-                var eventNameAttrebute = targetClass.GetCustomAttribute<EventNameAttribute>();
-                if (eventNameAttrebute is null)
+                var eventNameAttribute = targetClass.GetCustomAttribute<EventNameAttribute>();
+                if (eventNameAttribute is null)
                 {
                     continue;
                 }
@@ -56,8 +56,8 @@ namespace ShineSyncControl.Services.TaskEventWorker
                     continue;
                 }
 
-                baseEvents.Add(eventNameAttrebute.EventName, obj);
-                eventsNames.Add(eventNameAttrebute.EventName);
+                baseEvents.Add(eventNameAttribute.EventName, obj);
+                eventsNames.Add(eventNameAttribute.EventName);
             }
         }
     }
